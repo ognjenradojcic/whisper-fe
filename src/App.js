@@ -19,14 +19,9 @@ function App() {
 
     const channel = pusher.subscribe('chat');
     channel.bind('message', function (data) {
-      alert(JSON.stringify(data))
-      allMessages.push(JSON.stringify(data));
+      allMessages.push(data);
       setMessages(allMessages)
     });
-
-    messages.map(message => {
-      console.log(message.message)
-    })
   }, [])
 
   const submit = async e => {
@@ -53,16 +48,16 @@ function App() {
         <div className="list-group list-group-flush border-bottom scrollarea">
           <div>
           </div>
-          {messages.map(message => {
+          {messages.map(message => (
             <div className="list-group-item list-group-item-action py-3 lh-sm" >
               <div className="d-flex w-100 align-items-center justify-content-between">
                 <strong className="mb-1">{message.username}</strong>
               </div>
               <div className="col-10 mb-1 small">
-                Hello{message.message}
+                {message.message}
               </div>
             </div>
-          })}
+          ))}
 
         </div>
 
