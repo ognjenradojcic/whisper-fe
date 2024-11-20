@@ -1,33 +1,38 @@
-import { useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import './App.css';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 import axios from 'axios';
+window.Pusher = Pusher;
+
+declare global {
+  interface Window {
+    Pusher: any;
+    Echo: Echo<any>;
+  }
+}
+
+interface MessageEvent {
+  username: string;
+  message: string;
+}
 
 function App() {
-  const [username, setUsername] = useState('username')
-  const [messages, setMessages] = useState([])
-  const [message, setMessage] = useState('')
-  let allMessages = [];
+  const [username, setUsername] = useState<string>('username')
+  const [messages, setMessages] = useState<MessageEvent[]>([])
+  const [message, setMessage] = useState<string>('')
+  let allMessages: MessageEvent[] = [];
 
   useEffect(() => {
-    // Pusher.logToConsole = true;
-
-    // const pusher = new Pusher('f459af705400ac2b079e', {
-    //   cluster: 'eu'
-    // });
-
-
-
     window.Echo = new Echo({
       authEndpoint: 'http://localhost:8000/api/broadcasting/auth',
       broadcaster: 'pusher',
       key: 'f459af705400ac2b079e',
       cluster: 'eu',
       encrypted: true,
-      authorizer: (channel, options) => {
+      authorizer: (channel: any , options: any) => {
         return {
-          authorize: (socketId, callback) => {
+          authorize: (socketId: string, callback: Function) => {
             axios.post('http://localhost:8000/api/broadcasting/auth',
               {
                 socket_id: socketId,
@@ -50,28 +55,16 @@ function App() {
           }
         };
       },
-      // auth: {
-      //   headers: {
-      //     authorization: 'Bearer 2|0jmkmqEMI7JTEXYK4MWT6wACAJ8jUjkGJVgIAMwq1c57ae6a'
-      //   }
-      // }
     });
 
     window.Echo.private('chat')
-      .listen('MessageReceived', (e) => {
+      .listen('MessageReceived', (e: MessageEvent) => {
         allMessages.push(e);
         setMessages(allMessages)
       })
-
-    /*const channel = pusher.subscribe('chat');
-    channel.bind('message', function (data) {
-      allMessages.push(data);
-      setMessages(allMessages)
-    });
-    */
   }, [])
 
-  const submit = async e => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
 
     await fetch('http://localhost:8000/api/messages', {
@@ -112,7 +105,6 @@ function App() {
 
       <form onSubmit={e => submit(e)}>
         <input className="form-control" placeholder='Write a message' value={message} onChange={e => setMessage(e.target.value)}>
-
         </input>
       </form>
     </div>
