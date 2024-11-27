@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Formik, Form, Field, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import Input from "../components/Input";
-import useSignIn from "react-auth-kit/hooks/useSignIn";
 import axios, { AxiosError } from "axios";
+import { useAuth } from "../common/context/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 interface FormValues {
   email: string;
@@ -18,7 +19,8 @@ const LoginSchema = Yup.object().shape({
 });
 
 const Login = () => {
-  const singIn = useSignIn();
+  const { login, isLoggedIn } = useAuth();
+  const navigate = useNavigate();
 
   const LoginSubmit = async (
     values: FormValues,
@@ -30,18 +32,21 @@ const Login = () => {
         values
       );
 
-      singIn({
-        auth: {
-          token: response.data.token,
-          type: "Bearer",
-        },
-      });
+      if (response?.data) {
+        login(response?.data);
+      }
     } catch (err) {
       if (err && err instanceof AxiosError)
         console.log("Error ", err.response?.data.message);
       else console.log("Error ", err);
     }
   };
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate("/home");
+    }
+  }, [isLoggedIn]);
 
   return (
     <section className="vh-100 gradient-custom">
