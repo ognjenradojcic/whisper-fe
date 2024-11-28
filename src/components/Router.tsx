@@ -4,6 +4,7 @@ import { useAuth } from "../common/context/AuthProvider";
 import Chat from "../pages/Chat";
 import Login from "../pages/Login";
 import Home from "../pages/Home";
+import Register from "../pages/Register";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -20,7 +21,9 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
 const Router = () => {
   return (
     <Routes>
+      <Route index element={<Navigate to="/home" />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
       <Route
         path="/home"
         element={
