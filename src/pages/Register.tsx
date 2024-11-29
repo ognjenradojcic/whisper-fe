@@ -5,6 +5,7 @@ import { useAuth } from "../common/context/AuthProvider";
 import { NavLink, useNavigate } from "react-router-dom";
 import axios, { AxiosError } from "axios";
 import Input from "../components/Input";
+import Toast from "../common/Toast";
 
 interface FormValues {
   name: string;
@@ -49,8 +50,8 @@ const Register = () => {
       navigate("/login");
     } catch (err) {
       if (err && err instanceof AxiosError)
-        console.log("Error ", err.response?.data.message);
-      else console.log("Error ", err);
+        Toast.error(err.response?.data.message);
+      else Toast.error(err);
     }
   };
 

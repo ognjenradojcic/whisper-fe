@@ -6,6 +6,7 @@ import axios, { AxiosError } from "axios";
 import { useAuth } from "../common/context/AuthProvider";
 import { NavLink, useNavigate } from "react-router-dom";
 import storage from "../common/Storage";
+import Toast from "../common/Toast";
 
 interface FormValues {
   email: string;
@@ -40,9 +41,7 @@ const Login = () => {
         storage.set("user", data);
       }
     } catch (err) {
-      if (err && err instanceof AxiosError)
-        console.log("Error ", err.response?.data.message);
-      else console.log("Error ", err);
+      Toast.error("Unexpected error. Try again later");
     }
   };
 
@@ -73,7 +72,7 @@ const Login = () => {
                     onSubmit={LoginSubmit}
                   >
                     {(props) => (
-                      <Form>
+                      <Form noValidate>
                         <Input
                           label="Email"
                           name="email"

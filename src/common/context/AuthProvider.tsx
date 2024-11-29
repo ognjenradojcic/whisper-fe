@@ -35,7 +35,6 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   const login = (data: ILoginResponse) => {
     setIsLoggedIn(true);
     setLoginData(data);
-    storage.set("user", data);
   };
 
   const logout = () => {
