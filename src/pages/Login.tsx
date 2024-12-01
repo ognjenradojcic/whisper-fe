@@ -1,12 +1,10 @@
-import React, { useEffect } from "react";
-import { Formik, Form, Field, FormikHelpers } from "formik";
+import { useEffect } from "react";
+import { Formik, Form, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import Input from "../components/Input";
-import axios, { AxiosError } from "axios";
 import { useAuth } from "../common/context/AuthProvider";
 import { NavLink, useNavigate } from "react-router-dom";
-import storage from "../common/Storage";
-import Toast from "../common/Toast";
+import { AuthService } from "../common/services/AuthService";
 
 interface FormValues {
   email: string;
@@ -29,19 +27,12 @@ const Login = () => {
     actions: FormikHelpers<FormValues>
   ) => {
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/login",
-        values
-      );
+      const response = await AuthService.login(values);
 
-      let data = response?.data;
-
-      if (data) {
-        login(data);
-        storage.set("user", data);
+      if (response?.data) {
+        login(response?.data);
       }
-    } catch (err) {
-      Toast.error("Unexpected error. Try again later");
+    } finally {
     }
   };
 

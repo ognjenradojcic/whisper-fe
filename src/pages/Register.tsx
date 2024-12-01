@@ -3,18 +3,19 @@ import { Formik, Form, FormikValues, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import { useAuth } from "../common/context/AuthProvider";
 import { NavLink, useNavigate } from "react-router-dom";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import Input from "../components/Input";
 import Toast from "../common/Toast";
+import { AuthService } from "../common/services/AuthService";
 
 interface FormValues {
   name: string;
   email: string;
   password: string;
-  confirmPassword: string;
+  password_confirmation: string;
 }
 
-const passwordRegex = /^(?=(.*[a-z]))(?=(.*[A-Z]))(?=(.*\W)).{8}$/;
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}$/;
 
 const RegisterSchema = Yup.object().shape({
   name: Yup.string().required("Name is required"),
@@ -28,7 +29,7 @@ const RegisterSchema = Yup.object().shape({
       "Password must have atleast 1 uppercase, lowercase letter and special symbol"
     )
     .required("Password is required"),
-  confirmPassword: Yup.string()
+  password_confirmation: Yup.string()
     .oneOf([Yup.ref("password"), null], "Passwords must match")
     .required("Confirm password is requred"),
 });
@@ -38,20 +39,14 @@ const Register = () => {
   const navigate = useNavigate();
 
   const RegisterSubmit = async (
-    values: FormikValues,
+    values: FormValues,
     actions: FormikHelpers<FormValues>
   ) => {
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/reg",
-        values
-      );
+      const response = await AuthService.register(values);
 
       navigate("/login");
-    } catch (err) {
-      if (err && err instanceof AxiosError)
-        Toast.error(err.response?.data.message);
-      else Toast.error(err);
+    } finally {
     }
   };
 
@@ -81,7 +76,7 @@ const Register = () => {
                       name: "",
                       email: "",
                       password: "",
-                      confirmPassword: "",
+                      password_confirmation: "",
                     }}
                     validationSchema={RegisterSchema}
                     onSubmit={RegisterSubmit}
@@ -111,9 +106,9 @@ const Register = () => {
                         />
                         <Input
                           label="Confirm Password"
-                          name="confirmPassword"
+                          name="password_confirmation"
                           type="password"
-                          id="confirmPassword"
+                          id="password_confirmation"
                           className="form-control form-control-lg"
                         />
                         <button

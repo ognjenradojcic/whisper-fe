@@ -1,13 +1,22 @@
-import Login from "./pages/Login";
-import { Routes, Route } from "react-router-dom";
-import Chat from "./pages/Chat";
 import Router from "./components/Router";
 import useLoadUserFromLocalStorage from "./common/hooks/useLoadUserFromLocalStorage";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useEffect } from "react";
+
+declare var bootstrap: any;
 
 function App() {
   const { isLocalStorageLoaded } = useLoadUserFromLocalStorage();
+
+  useEffect(() => {
+    var tooltipTriggerList = [].slice.call(
+      document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    );
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
 
   if (isLocalStorageLoaded) {
     return (

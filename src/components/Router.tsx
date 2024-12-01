@@ -5,6 +5,7 @@ import Chat from "../pages/Chat";
 import Login from "../pages/Login";
 import Home from "../pages/Home";
 import Register from "../pages/Register";
+import AppLayout from "./AppLayout";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -12,8 +13,6 @@ interface ProtectedRouteProps {
 
 function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isLoggedIn } = useAuth();
-
-  console.log(isLoggedIn);
 
   return isLoggedIn ? children : <Navigate to={"/login"} />;
 }
@@ -24,22 +23,24 @@ const Router = () => {
       <Route index element={<Navigate to="/home" />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route
-        path="/home"
-        element={
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/chat"
-        element={
-          <ProtectedRoute>
-            <Chat />
-          </ProtectedRoute>
-        }
-      />
+      <Route element={<AppLayout />}>
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chat"
+          element={
+            <ProtectedRoute>
+              <Chat />
+            </ProtectedRoute>
+          }
+        />
+      </Route>
     </Routes>
   );
 };

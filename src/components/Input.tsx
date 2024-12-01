@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import { FC } from "react";
 import { FieldHookConfig, useField } from "formik";
 
 interface Props {
@@ -19,14 +19,10 @@ const Input: FC<Props & FieldHookConfig<string>> = ({ label, ...props }) => {
       <input
         {...field}
         {...props}
-        className={
-          meta.touched && meta.error
-            ? defaultClassName + " is-invalid"
-            : defaultClassName
-        }
+        className={error ? defaultClassName + " is-invalid" : defaultClassName}
       />
       <div
-        className={meta.touched && meta.error ? "text-danger" : "invisible"}
+        className={error ? "text-danger" : "invisible"}
         style={{ height: "10px" }}
       >
         {meta.error}

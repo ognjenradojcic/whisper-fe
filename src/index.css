@@ -16,3 +16,11 @@ code {
 .scrollarea {
   min-height: 500px;
 }
+
+.sidebar-link:hover{
+  background-color: #242648;
+}
+
+.tooltip{
+  font-size: 1.3rem !important; 
+}
