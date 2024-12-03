@@ -37,6 +37,7 @@ export const axios = axiosInstance.create({
   baseURL: config.baseUrl,
   headers: {
     "Content-Type": "application/json",
+    Accept: "application/json",
   },
 });
 
@@ -91,10 +92,10 @@ axios.interceptors.response.use(
         Toast.error(
           error.data.message || "You are not authorized for this action"
         );
-        return Promise.reject({ success: false, error });
+        break;
       case 429:
         Toast.warn("Too many requests. Try again later");
-        return Promise.reject({ success: false, error });
+        break;
       case 500:
         Toast.error("Unexpected error. Try again later");
         break;

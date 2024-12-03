@@ -33,7 +33,7 @@ const Router = () => {
           }
         />
         <Route
-          path="/chat"
+          path="/chats/:receiverId"
           element={
             <ProtectedRoute>
               <Chat />

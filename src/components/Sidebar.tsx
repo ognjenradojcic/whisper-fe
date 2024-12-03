@@ -24,7 +24,7 @@ const Sidebar = () => {
       <ul className="nav nav-pills nav-flush flex-column mb-auto text-center">
         <li>
           <Link
-            to="#"
+            to="/chats"
             className="sidebar-link nav-link py-3 rounded-0"
             data-bs-toggle="tooltip"
             data-bs-placement="right"
@@ -46,7 +46,7 @@ const Sidebar = () => {
         </li>
         <li>
           <Link
-            to="#"
+            to="/groups"
             className="sidebar-link nav-link py-3 rounded-0"
             data-bs-toggle="tooltip"
             data-bs-placement="right"
@@ -68,7 +68,7 @@ const Sidebar = () => {
         </li>
         <li>
           <Link
-            to="#"
+            to="/settings"
             className="sidebar-link nav-link py-3 rounded-0"
             data-bs-toggle="tooltip"
             data-bs-delay='{"show":500,"hide":200}'
@@ -94,7 +94,7 @@ const Sidebar = () => {
         <ul className="nav nav-pills nav-flush flex-column mb-auto text-center">
           <li>
             <Link
-              to="#"
+              to="/profile"
               className="sidebar-link nav-link py-3 rounded-0"
               data-bs-toggle="tooltip"
               data-bs-placement="right"

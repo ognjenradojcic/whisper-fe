@@ -1,5 +1,6 @@
 import { createContext, PropsWithChildren, useContext, useState } from "react";
 import storage from "../Storage";
+import { IUser } from "../models/User";
 
 interface LoginContextType {
   isLoggedIn: boolean;
@@ -13,7 +14,7 @@ export interface ILoginResponse {
   message: string;
   token: string;
   expires_in: number;
-  data: any; //user
+  data: IUser;
 }
 
 const LoginContext = createContext<LoginContextType | null>(null);

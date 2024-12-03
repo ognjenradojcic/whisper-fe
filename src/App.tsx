@@ -3,8 +3,21 @@ import useLoadUserFromLocalStorage from "./common/hooks/useLoadUserFromLocalStor
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useEffect } from "react";
+import Pusher from "pusher-js";
+import Echo from "laravel-echo";
+import { BroadcastService } from "./common/services/BroadcastService";
 
 declare var bootstrap: any;
+
+window.Pusher = Pusher;
+window.Echo = BroadcastService.echo();
+
+declare global {
+  interface Window {
+    Pusher: any;
+    Echo: Echo<any>;
+  }
+}
 
 function App() {
   const { isLocalStorageLoaded } = useLoadUserFromLocalStorage();
