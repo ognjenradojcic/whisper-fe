@@ -7,8 +7,8 @@ export const BroadcastService = {
     return new Echo({
       authEndpoint: `${config.baseUrl}/broadcasting/auth`,
       broadcaster: "pusher",
-      key: "f459af705400ac2b079e",
-      cluster: "eu",
+      key: config.pusherKey,
+      cluster: config.pusherCluster,
       encrypted: true,
       authorizer: (channel: any, options: any) => {
         return {
