@@ -24,12 +24,11 @@ const Home = () => {
       <div className="d-flex flex-column align-items-stretch flex-shrink-0">
         <div className="list-group list-group-flush border-none scrollarea">
           {users.map(({ id, name }, index) => (
-            <Link to={`/chats/${id}`}>
+            <Link to={`/chats/${id}`} key={index}>
               {" "}
               <div
                 className="list-group-item list-group-item-action py-3 lh-sm text-white"
                 style={{ backgroundColor: "transparent", fontSize: "1.3rem" }}
-                key={index}
               >
                 <div className="d-flex w-100 align-items-center justify-content-between">
                   <strong className="mb-1">{name}</strong>

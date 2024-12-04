@@ -1,21 +1,12 @@
 import { FormEvent, useEffect, useState } from "react";
-import Echo from "laravel-echo";
-import Pusher from "pusher-js";
-import { BroadcastService } from "../common/services/BroadcastService";
 import { MessageService } from "../common/services/MessageService";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../common/context/AuthProvider";
-import { send } from "process";
-
-interface MessageEvent {
-  id: number;
-  payload: string;
-}
+import { IMessage } from "../common/models/Message";
+import Echo from "laravel-echo";
 
 const Chat = () => {
-  const [username, setUsername] = useState<string>("username");
-  const [receivedMessages, setReceivedMessages] = useState<MessageEvent[]>([]);
-  const [sentMessages, setSentMessages] = useState<MessageEvent[]>([]);
+  const [messages, setMessages] = useState<IMessage[]>([]);
   const [message, setMessage] = useState<string>("");
   const { receiverId } = useParams();
   const { loginData } = useAuth();
@@ -28,8 +19,8 @@ const Chat = () => {
     const data = response?.data.data;
 
     if (data) {
-      setReceivedMessages(data.received);
-      setSentMessages(data.sent);
+      console.log("HERE");
+      setMessages((prevMessages) => [...prevMessages, ...data]);
     }
   };
 
@@ -38,9 +29,9 @@ const Chat = () => {
 
     const channel = window.Echo.private(`users.${receiverId}.${authUserId}`);
 
-    channel.listen("MessageReceived", (e: MessageEvent) => {
-      setReceivedMessages((prevMessages) => [...prevMessages, e]);
-      console.log("Event: ", e.payload);
+    channel.listen("MessageReceived", (e: IMessage) => {
+      setMessages((prevMessages) => [...prevMessages, e]);
+      console.log("Event: ", e);
     });
 
     return () => {
@@ -64,15 +55,19 @@ const Chat = () => {
     <div className="container">
       <div className="d-flex flex-column align-items-stretch flex-shrink-0 bg-body-tertiary"></div>
       <div className="list-group list-group-flush border-bottom scrollarea">
-        {receivedMessages.map((message, index) => (
+        {messages.map((message, index) => (
           <div
-            className="list-group-item list-group-item-action py-3 lh-sm"
+            className={`list-group-item list-group-item-action py-3 lh-sm ${
+              message.receiver.id === authUserId ? "text-start" : "text-end"
+            }`}
             key={index}
           >
-            <div className="d-flex w-100 align-items-center justify-content-between">
-              <strong className="mb-1">{message.payload}</strong>
+            <div className="card" style={{ width: "18rem" }}>
+              <div className="card-body">
+                <h3 className="card-title">{message.sender.name}</h3>
+                <p className="card-text">{message.payload}</p>
+              </div>
             </div>
-            <div className="col-10 mb-1 small">{message.payload}</div>
           </div>
         ))}
       </div>
