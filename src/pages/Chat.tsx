@@ -1,9 +1,8 @@
 import { FormEvent, useEffect, useState } from "react";
-import { MessageService } from "../common/services/MessageService";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../common/context/AuthProvider";
 import { IMessage } from "../common/models/Message";
-import Echo from "laravel-echo";
+import { MessageService } from "../common/services/MessageService";
 
 const Chat = () => {
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -18,9 +17,10 @@ const Chat = () => {
 
     const data = response?.data.data;
 
+    console.log(data);
+
     if (data) {
-      console.log("HERE");
-      setMessages((prevMessages) => [...prevMessages, ...data]);
+      setMessages(data);
     }
   };
 
@@ -31,7 +31,6 @@ const Chat = () => {
 
     channel.listen("MessageReceived", (e: IMessage) => {
       setMessages((prevMessages) => [...prevMessages, e]);
-      console.log("Event: ", e);
     });
 
     return () => {
@@ -52,24 +51,30 @@ const Chat = () => {
   };
 
   return (
-    <div className="container">
-      <div className="d-flex flex-column align-items-stretch flex-shrink-0 bg-body-tertiary"></div>
-      <div className="list-group list-group-flush border-bottom scrollarea">
-        {messages.map((message, index) => (
-          <div
-            className={`list-group-item list-group-item-action py-3 lh-sm ${
-              message.receiver.id === authUserId ? "text-start" : "text-end"
-            }`}
-            key={index}
-          >
-            <div className="card" style={{ width: "18rem" }}>
-              <div className="card-body">
-                <h3 className="card-title">{message.sender.name}</h3>
-                <p className="card-text">{message.payload}</p>
+    <div className="d-flex flex-column w-100 p-5">
+      <div className="d-flex flex-row">
+        <h1 className="text-white">Hello</h1>
+      </div>
+      <div className="d-flex flex-column-reverse overflow-auto w-100">
+        <div className="list-group list-group-flush border-bottom">
+          {messages.map((message, index) => (
+            <div
+              className={`d-flex list-group-item list-group-item-action py-3 lh-sm bg-transparent ${
+                message.receiver.id === authUserId
+                  ? "justify-content-start"
+                  : "justify-content-end"
+              }`}
+              key={index}
+            >
+              <div className="card" style={{ width: "18rem" }}>
+                <div className="card-body">
+                  <h3 className="card-title">{message.sender.name}</h3>
+                  <p className="card-text">{message.payload}</p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
       <form onSubmit={(e) => submit(e)}>
         <input

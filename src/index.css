@@ -24,3 +24,41 @@ code {
 .tooltip{
   font-size: 1.3rem !important; 
 }
+
+.search::placeholder{
+  color:gray;
+  opacity: 1;
+}
+
+.list-group-custom .list-group-item {
+  background-color: transparent;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid gray;
+}
+
+.list-group-custom .list-group-item:hover {
+  background-color: #242648;
+}
+
+.my-button{
+  background-color: #883CEF;
+  --bs-btn-hover-border-color: #883CEF;
+  border: 1px solid #883CEF;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color:gray;
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+}

@@ -114,7 +114,7 @@ const Register = () => {
                         <button
                           data-mdb-button-init
                           data-mdb-ripple-init
-                          className="btn btn-outline-light btn-lg px-5"
+                          className="my-button btn btn-lg px-5 text-white"
                           type="submit"
                         >
                           Register
