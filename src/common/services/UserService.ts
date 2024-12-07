@@ -7,4 +7,10 @@ export const UserService = {
 
     return response;
   },
+
+  async get(id: string) {
+    const response = await axios.get(`${config.baseUrl}/users/${id}`);
+
+    return response;
+  },
 };

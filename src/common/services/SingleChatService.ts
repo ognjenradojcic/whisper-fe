@@ -2,7 +2,7 @@ import Echo from "laravel-echo";
 import { axios } from "../config/axios";
 import config from "../config/config";
 
-export const MessageService = {
+export const SingleChatService = {
   async oldMessages(otherUserId: string) {
     const response = await axios.get(
       `${config.baseUrl}/messages/${otherUserId}/chat`

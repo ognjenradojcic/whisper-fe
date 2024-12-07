@@ -24,20 +24,22 @@ const Chats = () => {
         className="d-flex flex-column align-items-stretch w-30 border-end border-secondary border-opacity-25"
         style={{ width: "55vh" }}
       >
-        <h2 className="text-white p-5">Chats</h2>
-        <div className="search-div pe-1">
-          <button
-            className="my-button btn btn-lg px-5 mb-4 text-white"
-            type="submit"
-          >
-            All
-          </button>
-          <button
-            className="my-button btn btn-lg px-5 mb-4 ms-3 text-white"
-            type="submit"
-          >
-            Unread
-          </button>
+        <h1 className="text-white py-5 ps-3">Chats</h1>
+        <div className="search-div ps-3">
+          <div className="d-flex gap-2">
+            <button
+              className="my-button btn btn-lg px-5 mb-4 text-white"
+              type="submit"
+            >
+              All
+            </button>
+            <button
+              className="my-button btn btn-lg px-5 mb-4 ms-3 text-white"
+              type="submit"
+            >
+              Unread
+            </button>
+          </div>
           <input
             type="search"
             className="search form-control form-control-lg text-bg-dark border border-0 w-75"

@@ -1,0 +1,133 @@
+import { AxiosResponse } from "axios";
+import { FormEvent, useEffect, useState } from "react";
+import { useAuth } from "../common/context/AuthProvider";
+import { IGroup } from "../common/models/Group";
+import { IMessage } from "../common/models/Message";
+import { IUser } from "../common/models/User";
+
+interface MessageEvent {
+  message: IMessage;
+}
+
+interface ChatProps<T> {
+  entityId: string;
+  entityService: {
+    oldMessages: (id: string) => Promise<AxiosResponse<any, any>>;
+    create: (data: any) => Promise<AxiosResponse<any, any>>;
+  };
+  echoChannel: (id: string, authUserId: number) => string;
+  entityLabel: string;
+}
+
+const Chat = <T,>({ entityId, entityService, echoChannel }: ChatProps<T>) => {
+  const [messages, setMessages] = useState<IMessage[]>([]);
+  const [payload, setPayload] = useState<string>("");
+  const [entity, setEntity] = useState<IUser | IGroup>();
+  const { loginData } = useAuth();
+
+  const authUserId = loginData.data.id;
+
+  const getMessages = async () => {
+    const response = await entityService.oldMessages(entityId);
+
+    const data = response?.data.data;
+
+    if (data) {
+      setEntity(data.receiver ?? data.group);
+      setMessages(data.messages);
+    }
+  };
+
+  useEffect(() => {
+    getMessages();
+
+    const channel = window.Echo.private(echoChannel(entityId, authUserId));
+
+    channel.listen("MessageReceived", (e: MessageEvent) => {
+      setMessages((prevMessages) => [...prevMessages, e.message]);
+    });
+
+    return () => {
+      channel.stopListening("MessageReceived");
+    };
+  }, [entityId]);
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    entityService
+      .create({
+        receiver_id: entityId,
+        payload: payload,
+      })
+      .catch((error) => {
+        console.log("Error: ", error);
+      });
+
+    const sentMessage = {
+      id: -1,
+      sender: {
+        id: authUserId,
+        name: loginData.data.name,
+      },
+      payload: payload,
+      created_at: new Date().toISOString(),
+    };
+
+    setMessages((prevMessages) => [...prevMessages, sentMessage]);
+
+    setPayload("");
+  };
+
+  return (
+    <div className="d-flex flex-column justify-content-end w-100">
+      <div
+        className="d-flex border-bottom border-secondary flex-row mb-auto align-content-ceter"
+        style={{ backgroundColor: "#04051B" }}
+      >
+        <h3 className="text-white p-3" style={{ fontSize: "2.3rem" }}>
+          {entity?.name}
+        </h3>
+      </div>
+      <div className="d-flex flex-column-reverse overflow-auto w-100 p-5">
+        <ul className="list-group list-group-flush border-0">
+          {messages.map((message, index) => (
+            <li
+              className={`d-flex list-group-item list-group-item-action py-3 lh-sm bg-transparent border-0 ${
+                message.sender.id === authUserId
+                  ? "justify-content-end"
+                  : "justify-content-start"
+              }`}
+              key={index}
+            >
+              <div
+                className={`card ${
+                  message.sender.id === authUserId
+                    ? "sender-card"
+                    : "receiver-card"
+                }`}
+                style={{ width: "18rem" }}
+              >
+                <div className="card-body">
+                  <h3 className="card-title">{message.sender.name}</h3>
+                  <p className="card-text">{message.payload}</p>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="p-5">
+        <form onSubmit={(e) => submit(e)}>
+          <input
+            className="search form-control form-control-lg text-bg-dark border border-0"
+            placeholder="Write a message"
+            value={payload}
+            onChange={(e) => setPayload(e.target.value)}
+          />
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default Chat;

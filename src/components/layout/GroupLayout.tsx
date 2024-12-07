@@ -1,5 +1,4 @@
-import { Outlet, Route, Routes } from "react-router-dom";
-import Sidebar from "../Sidebar";
+import { Outlet } from "react-router-dom";
 import Groups from "../../pages/Groups";
 
 const GroupLayout = () => {
