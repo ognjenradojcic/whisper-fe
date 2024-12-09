@@ -4,6 +4,7 @@ import { useAuth } from "../common/context/AuthProvider";
 import { IGroup } from "../common/models/Group";
 import { IMessage } from "../common/models/Message";
 import { IUser } from "../common/models/User";
+import { MessageStatus } from "../common/enums/MessageStatus";
 
 interface MessageEvent {
   message: IMessage;
@@ -51,17 +52,9 @@ const Chat = <T,>({ entityId, entityService, echoChannel }: ChatProps<T>) => {
       channel.stopListening("MessageReceived");
     };
   }, [entityId]);
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-
-    entityService
-      .create({
-        receiver_id: entityId,
-        payload: payload,
-      })
-      .catch((error) => {
-        console.log("Error: ", error);
-      });
 
     const sentMessage = {
       id: -1,
@@ -71,9 +64,33 @@ const Chat = <T,>({ entityId, entityService, echoChannel }: ChatProps<T>) => {
       },
       payload: payload,
       created_at: new Date().toISOString(),
+      status: MessageStatus.Sending,
     };
 
     setMessages((prevMessages) => [...prevMessages, sentMessage]);
+
+    try {
+      const response = await entityService.create({
+        receiver_id: entityId,
+        payload: payload,
+      });
+
+      setMessages((prevMessages) =>
+        prevMessages.map((message) =>
+          message === sentMessage ? response?.data : message
+        )
+      );
+    } catch (error) {
+      setMessages((prevMessages) =>
+        prevMessages.map((message) => {
+          if (message === sentMessage) {
+            message.status = MessageStatus.Failed;
+          }
+
+          return message;
+        })
+      );
+    }
 
     setPayload("");
   };
@@ -110,6 +127,10 @@ const Chat = <T,>({ entityId, entityService, echoChannel }: ChatProps<T>) => {
                 <div className="card-body">
                   <h3 className="card-title">{message.sender.name}</h3>
                   <p className="card-text">{message.payload}</p>
+                  {message?.status === MessageStatus.Sending && (
+                    <p>Sending...</p>
+                  )}
+                  {message?.status === MessageStatus.Failed && <p>Failed</p>}
                 </div>
               </div>
             </li>

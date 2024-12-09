@@ -1,3 +1,4 @@
+import { MessageStatus } from "../enums/MessageStatus";
 import { IGroup } from "./Group";
 import { IUser } from "./User";
 
@@ -7,4 +8,5 @@ export interface IMessage {
   sender: IUser;
   receiver?: IUser;
   group?: IGroup;
+  status?: MessageStatus;
 }
