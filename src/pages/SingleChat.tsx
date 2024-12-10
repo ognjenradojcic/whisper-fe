@@ -13,6 +13,7 @@ const SingleChat = () => {
         `users.${id}.${authUserId}`
       }
       entityLabel="name"
+      entityKeyName="receiver_id"
     />
   );
 };

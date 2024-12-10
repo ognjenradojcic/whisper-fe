@@ -5,6 +5,7 @@ import { IGroup } from "../common/models/Group";
 import { IMessage } from "../common/models/Message";
 import { IUser } from "../common/models/User";
 import { MessageStatus } from "../common/enums/MessageStatus";
+import { useNavigate } from "react-router-dom";
 
 interface MessageEvent {
   message: IMessage;
@@ -16,11 +17,17 @@ interface ChatProps<T> {
     oldMessages: (id: string) => Promise<AxiosResponse<any, any>>;
     create: (data: any) => Promise<AxiosResponse<any, any>>;
   };
-  echoChannel: (id: string, authUserId: number) => string;
+  echoChannel: (id: string, authUserId?: number) => string;
   entityLabel: string;
+  entityKeyName: string;
 }
 
-const Chat = <T,>({ entityId, entityService, echoChannel }: ChatProps<T>) => {
+const Chat = <T,>({
+  entityId,
+  entityService,
+  echoChannel,
+  entityKeyName,
+}: ChatProps<T>) => {
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [payload, setPayload] = useState<string>("");
   const [entity, setEntity] = useState<IUser | IGroup>();
@@ -71,7 +78,7 @@ const Chat = <T,>({ entityId, entityService, echoChannel }: ChatProps<T>) => {
 
     try {
       const response = await entityService.create({
-        receiver_id: entityId,
+        [entityKeyName]: entityId,
         payload: payload,
       });
 

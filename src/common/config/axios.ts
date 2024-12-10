@@ -57,6 +57,22 @@ axios.interceptors.request.use(
   }
 );
 
+axios.interceptors.request.use(
+  async function (config) {
+    const socketId = window.Echo.connector?.socketId();
+
+    if (socketId) {
+      config.headers["X-Socket-ID"] = socketId;
+    }
+
+    return config;
+  },
+
+  function (error) {
+    return Promise.reject(error);
+  }
+);
+
 axios.interceptors.response.use(
   (response): ApiResponse => {
     if (response?.data?.message) {
@@ -108,6 +124,6 @@ axios.interceptors.response.use(
         );
     }
 
-    return Promise.reject(error);
+    return error;
   }
 );

@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { GroupChatService } from "../common/services/GroupChatService copy";
+import { GroupChatService } from "../common/services/GroupChatService";
 import Chat from "../components/Chat";
 
 const GroupChat = () => {
@@ -9,10 +9,9 @@ const GroupChat = () => {
     <Chat
       entityId={groupId}
       entityService={GroupChatService}
-      echoChannel={(id: string, authUserId: number) =>
-        `groups.${id}.${authUserId}`
-      }
+      echoChannel={(id: string) => `groups.${id}`}
       entityLabel="name"
+      entityKeyName="group_id"
     />
   );
 };

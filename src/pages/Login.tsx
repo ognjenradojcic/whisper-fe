@@ -34,7 +34,8 @@ const Login = () => {
       if (response?.data) {
         login(response?.data);
       }
-    } finally {
+    } catch (error) {
+      console.error(error);
     }
   };
 

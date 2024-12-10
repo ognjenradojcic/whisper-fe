@@ -3,7 +3,7 @@ import Groups from "../../pages/Groups";
 
 const GroupLayout = () => {
   return (
-    <div className="d-flex">
+    <div className="d-flex flex-fill">
       <Groups />
       <Outlet />
     </div>

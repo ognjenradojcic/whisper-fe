@@ -9,6 +9,7 @@ import ChatsLayout from "./layout/ChatLayout";
 import GroupLayout from "./layout/GroupLayout";
 import SingleChat from "../pages/SingleChat";
 import GroupChat from "../pages/GroupChat";
+import Page404 from "../pages/404";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -26,6 +27,7 @@ const Router = () => {
       <Route index element={<Navigate to="/chats" />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/404" element={<Page404 />} />
       <Route
         element={
           <ProtectedRoute>

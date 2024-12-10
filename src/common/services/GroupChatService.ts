@@ -1,11 +1,10 @@
-import Echo from "laravel-echo";
 import { axios } from "../config/axios";
 import config from "../config/config";
 
 export const GroupChatService = {
   async oldMessages(groupId: string) {
     const response = await axios.get(
-      `${config.baseUrl}/messages/${groupId}/chat`
+      `${config.baseUrl}/messages/${groupId}/group`
     );
 
     return response;
