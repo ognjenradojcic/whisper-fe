@@ -10,6 +10,7 @@ import GroupLayout from "./layout/GroupLayout";
 import SingleChat from "../pages/SingleChat";
 import GroupChat from "../pages/GroupChat";
 import Page404 from "../pages/404";
+import Profile from "../pages/Profile";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -35,6 +36,7 @@ const Router = () => {
           </ProtectedRoute>
         }
       >
+        <Route path="/profile" element={<Profile />} />
         <Route path="/chats" element={<ChatsLayout />}>
           <Route path=":receiverId" element={<SingleChat />} />
         </Route>

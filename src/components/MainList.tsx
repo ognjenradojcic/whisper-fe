@@ -32,7 +32,7 @@ const MainList = ({ headerLabel, entityService, route }: MainListProps) => {
     <div className="d-flex justify-content-start">
       <div
         className="d-flex flex-column align-items-stretch w-30 border-end border-secondary border-opacity-25"
-        style={{ width: "55vh" }}
+        style={{ width: "30vw" }}
       >
         <h1 className="text-white py-5 ps-3">{headerLabel}</h1>
         <div className="search-div ps-3">

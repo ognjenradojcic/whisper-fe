@@ -1,5 +1,6 @@
 import { axios } from "../config/axios";
 import config from "../config/config";
+import { IUser } from "../models/User";
 
 export const UserService = {
   async index() {
@@ -13,4 +14,6 @@ export const UserService = {
 
     return response;
   },
+
+  async update(data: { name: string }) {},
 };
