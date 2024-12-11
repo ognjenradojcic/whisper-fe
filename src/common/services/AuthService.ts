@@ -47,4 +47,25 @@ export const AuthService = {
 
     return response;
   },
+
+  async forgotPassword(data: { email: string }) {
+    const response = await axios.post(
+      `${config.baseUrl}/forgot-password`,
+      data
+    );
+
+    return response;
+  },
+
+  async resetPassword(data: {
+    token: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+  }) {
+    console.log(data);
+    const response = await axios.post(`${config.baseUrl}/reset-password`, data);
+
+    return response;
+  },
 };

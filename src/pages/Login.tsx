@@ -29,14 +29,10 @@ const Login = () => {
     values: FormValues,
     actions: FormikHelpers<FormValues>
   ) => {
-    try {
-      const response = await AuthService.login(values);
+    const response = await AuthService.login(values);
 
-      if (response?.data) {
-        login(response?.data);
-      }
-    } catch (error) {
-      console.error(error);
+    if (response?.data) {
+      login(response?.data);
     }
   };
 
@@ -105,7 +101,7 @@ const Login = () => {
                     )}
                   </Formik>
                   <p className="small mt-5 pb-lg-2 mb-5">
-                    <NavLink className="text-white-50" to={""}>
+                    <NavLink className="text-white-50" to="/forgot-password">
                       Forgot password?
                     </NavLink>
                   </p>

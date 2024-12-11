@@ -1,26 +1,20 @@
-import { useEffect } from "react";
-import { Formik, Form, FormikValues, FormikHelpers } from "formik";
+import { useEffect, useState } from "react";
+import { Formik, Form, FormikHelpers } from "formik";
 import * as Yup from "yup";
-import { useAuth } from "../common/context/AuthProvider";
-import { NavLink, useNavigate } from "react-router-dom";
-import { AxiosError } from "axios";
 import Input from "../components/Input";
-import Toast from "../common/Toast";
+import { useAuth } from "../common/context/AuthProvider";
+import { Link, NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthService } from "../common/services/AuthService";
+import { useLoading } from "../common/context/LoginProvider";
+import Loading from "../components/Loading";
 import config from "../common/config/config";
 
 interface FormValues {
-  name: string;
-  email: string;
   password: string;
   password_confirmation: string;
 }
 
-const RegisterSchema = Yup.object().shape({
-  name: Yup.string().required("Name is required"),
-  email: Yup.string()
-    .email("Must be a valid email")
-    .required("Email is required"),
+const ResetPasswordSchema = Yup.object().shape({
   password: Yup.string()
     .min(8, "Password must have at least 8 characters")
     .matches(
@@ -33,16 +27,21 @@ const RegisterSchema = Yup.object().shape({
     .required("Confirm password is requred"),
 });
 
-const Register = () => {
+const ResetPassword = () => {
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
+  let [searchParams] = useSearchParams();
 
-  const RegisterSubmit = async (
+  const ResetPasswordSubmit = async (
     values: FormValues,
     actions: FormikHelpers<FormValues>
   ) => {
     try {
-      const response = await AuthService.register(values);
+      await AuthService.resetPassword({
+        token: searchParams.get("token"),
+        email: searchParams.get("email"),
+        ...values,
+      });
 
       navigate("/login");
     } catch (error) {
@@ -52,7 +51,7 @@ const Register = () => {
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate("/home");
+      navigate("/chats");
     }
   }, [isLoggedIn]);
 
@@ -71,33 +70,16 @@ const Register = () => {
             >
               <div className="card-body p-5 text-center">
                 <div className="mb-md-5 mt-md-4 pb-5">
-                  <h1 className="fw-bold mb-5 text-uppercase">Register</h1>
+                  <h1 className="fw-bold mb-5 text-uppercase">
+                    Reset Password
+                  </h1>
                   <Formik
-                    initialValues={{
-                      name: "",
-                      email: "",
-                      password: "",
-                      password_confirmation: "",
-                    }}
-                    validationSchema={RegisterSchema}
-                    onSubmit={RegisterSubmit}
+                    initialValues={{ password: "", password_confirmation: "" }}
+                    validationSchema={ResetPasswordSchema}
+                    onSubmit={ResetPasswordSubmit}
                   >
                     {(props) => (
-                      <Form>
-                        <Input
-                          label="Name"
-                          name="name"
-                          type="text"
-                          id="name"
-                          className="form-control form-control-lg"
-                        />
-                        <Input
-                          label="Email"
-                          name="email"
-                          type="email"
-                          id="email"
-                          className="form-control form-control-lg"
-                        />
+                      <Form noValidate>
                         <Input
                           label="Password"
                           name="password"
@@ -118,19 +100,16 @@ const Register = () => {
                           className="my-button btn btn-lg px-5 text-white"
                           type="submit"
                         >
-                          Register
+                          Reset Password
                         </button>
                       </Form>
                     )}
                   </Formik>
-                  <div>
-                    <p className="mt-5">
-                      Already have an account?{" "}
-                      <NavLink to="/login" className="text-white-50 fw-bold">
-                        Login
-                      </NavLink>
-                    </p>
-                  </div>
+                  <p className="small mt-5 pb-lg-2 mb-5">
+                    <NavLink className="text-white-50" to={"/login"}>
+                      Login
+                    </NavLink>
+                  </p>
                 </div>
               </div>
             </div>
@@ -141,4 +120,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default ResetPassword;
