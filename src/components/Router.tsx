@@ -11,6 +11,7 @@ import SingleChat from "../pages/SingleChat";
 import GroupChat from "../pages/GroupChat";
 import Page404 from "../pages/404";
 import Profile from "../pages/Profile";
+import GoogleCallback from "./GoogleCallback";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -28,6 +29,7 @@ const Router = () => {
       <Route index element={<Navigate to="/chats" />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/google/callback" element={<GoogleCallback />} />
       <Route path="/404" element={<Page404 />} />
       <Route
         element={

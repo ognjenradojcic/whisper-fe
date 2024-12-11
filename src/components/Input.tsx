@@ -23,7 +23,7 @@ const Input: FC<Props & FieldHookConfig<string>> = ({ label, ...props }) => {
       />
       <div
         className={error ? "text-danger" : "invisible"}
-        style={{ height: "10px" }}
+        style={{ height: "30px" }}
       >
         {meta.error}
       </div>

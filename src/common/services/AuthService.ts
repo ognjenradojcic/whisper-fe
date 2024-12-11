@@ -29,4 +29,22 @@ export const AuthService = {
 
     return response;
   },
+
+  async googleRedirect() {
+    const response = await axios.get(`${config.baseUrl}/google/redirect`);
+
+    return response;
+  },
+
+  async googleCallback(parameters: string) {
+    const response = await axios.get(
+      `${config.baseUrl}/google/callback${parameters}`
+    );
+
+    if (response?.data) {
+      storage.set("user", response?.data);
+    }
+
+    return response;
+  },
 };

@@ -1,4 +1,4 @@
-import { Outlet, Route, Routes } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Sidebar from "../Sidebar";
 
 const AppLayout = () => {

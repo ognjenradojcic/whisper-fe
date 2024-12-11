@@ -17,6 +17,10 @@ code {
   min-height: 500px;
 }
 
+.sidebar-link{
+  transition: 0.4s;
+}
+
 .sidebar-link:hover{
   background-color: #242648;
 }

@@ -46,7 +46,8 @@ const Register = () => {
       const response = await AuthService.register(values);
 
       navigate("/login");
-    } finally {
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -66,11 +67,12 @@ const Register = () => {
               style={{
                 borderRadius: "1rem",
                 backgroundColor: "transparent",
+                fontSize: "1.5rem",
               }}
             >
               <div className="card-body p-5 text-center">
                 <div className="mb-md-5 mt-md-4 pb-5">
-                  <h2 className="fw-bold mb-5 text-uppercase">Register</h2>
+                  <h1 className="fw-bold mb-5 text-uppercase">Register</h1>
                   <Formik
                     initialValues={{
                       name: "",
