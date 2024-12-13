@@ -44,7 +44,7 @@ const Register = () => {
     try {
       const response = await AuthService.register(values);
 
-      navigate("/login");
+      navigate("/chats");
     } catch (error) {
       console.error(error);
     }
@@ -52,7 +52,7 @@ const Register = () => {
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate("/home");
+      navigate("/chats");
     }
   }, [isLoggedIn]);
 

@@ -6,6 +6,14 @@ import { IMessage } from "../common/models/Message";
 import { IUser } from "../common/models/User";
 import { MessageStatus } from "../common/enums/MessageStatus";
 import { useNavigate } from "react-router-dom";
+import storage from "../common/Storage";
+import {} from "../common/helpers/helpers";
+import {
+  decryptAllMessages,
+  decryptMessagePayload,
+  EncryptionService,
+  encryptMessagePayload,
+} from "../common/services/EncryptionService";
 
 interface MessageEvent {
   message: IMessage;
@@ -31,9 +39,12 @@ const Chat = <T,>({
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [payload, setPayload] = useState<string>("");
   const [entity, setEntity] = useState<IUser | IGroup>();
-  const { loginData } = useAuth();
+  const { authUser } = useAuth();
 
-  const authUserId = loginData.data.id;
+  const authUserId = authUser.id;
+
+  console.log(authUser);
+  const receiverPublicKey = entity?.public_key;
 
   const getMessages = async () => {
     const response = await entityService.oldMessages(entityId);
@@ -42,7 +53,8 @@ const Chat = <T,>({
 
     if (data) {
       setEntity(data.receiver ?? data.group);
-      setMessages(data.messages);
+
+      setMessages(await decryptAllMessages(data.messages, authUserId));
     }
   };
 
@@ -51,7 +63,14 @@ const Chat = <T,>({
 
     const channel = window.Echo.private(echoChannel(entityId, authUserId));
 
-    channel.listen("MessageReceived", (e: MessageEvent) => {
+    channel.listen("MessageReceived", async (e: MessageEvent) => {
+      const receivedMessage = e.message;
+
+      receivedMessage.payload = await decryptMessagePayload(
+        receivedMessage,
+        authUserId
+      );
+
       setMessages((prevMessages) => [...prevMessages, e.message]);
     });
 
@@ -67,7 +86,7 @@ const Chat = <T,>({
       id: -1,
       sender: {
         id: authUserId,
-        name: loginData.data.name,
+        name: authUser.name,
       },
       payload: payload,
       created_at: new Date().toISOString(),
@@ -77,14 +96,27 @@ const Chat = <T,>({
     setMessages((prevMessages) => [...prevMessages, sentMessage]);
 
     try {
+      const aesKey = await EncryptionService.generateAESKey();
+
+      const encryptedMessage = await encryptMessagePayload(
+        payload,
+        aesKey,
+        receiverPublicKey
+      );
+
       const response = await entityService.create({
         [entityKeyName]: entityId,
-        payload: payload,
+        ...encryptedMessage,
       });
+
+      response.data.payload = await decryptMessagePayload(
+        response?.data,
+        authUserId
+      );
 
       setMessages((prevMessages) =>
         prevMessages.map((message) =>
-          message === sentMessage ? response?.data : message
+          message === sentMessage ? response.data : message
         )
       );
     } catch (error) {

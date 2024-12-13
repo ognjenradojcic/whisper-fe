@@ -4,9 +4,9 @@ import { IUser } from "../models/User";
 
 interface LoginContextType {
   isLoggedIn: boolean;
-  loginData: ILoginResponse | null;
+  authUser: IUser | null;
   isAdmin: boolean | undefined;
-  login: (loginData: ILoginResponse) => void;
+  login: (loginData: IUser) => void;
   logout: () => void;
 }
 
@@ -29,26 +29,28 @@ export const useAuth = () => {
 
 const AuthProvider = ({ children }: PropsWithChildren) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [loginData, setLoginData] = useState<ILoginResponse | null>(null);
+  const [authUser, setAuthUser] = useState<IUser | null>(null);
 
   const isAdmin = true; // Change later, get from response
 
-  const login = (data: ILoginResponse) => {
+  const login = (data: IUser) => {
     setIsLoggedIn(true);
-    setLoginData(data);
+    setAuthUser(data);
   };
 
   const logout = () => {
     setIsLoggedIn(false);
-    setLoginData(null);
+    setAuthUser(null);
     storage.remove("user");
+    storage.remove("private_key");
+    storage.remove("public_key");
   };
 
   return (
     <LoginContext.Provider
       value={{
         isLoggedIn,
-        loginData,
+        authUser,
         isAdmin,
         login,
         logout,

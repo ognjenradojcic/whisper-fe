@@ -7,6 +7,11 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { AuthService } from "../common/services/AuthService";
 import { useLoading } from "../common/context/LoginProvider";
 import Loading from "../components/Loading";
+import { error } from "console";
+import { EncryptionService } from "../common/services/EncryptionService";
+import storage from "../common/Storage";
+import { UserService } from "../common/services/UserService";
+import { publicKeyUpdate } from "../common/helpers/helpers";
 
 interface FormValues {
   email: string;
@@ -31,8 +36,18 @@ const Login = () => {
   ) => {
     const response = await AuthService.login(values);
 
-    if (response?.data) {
-      login(response?.data);
+    const userData = response?.data.data;
+
+    if (userData) {
+      login(userData);
+
+      if (
+        !userData.public_key ||
+        !storage.get("private_key") ||
+        userData.public_key !== storage.get("public_key")
+      ) {
+        publicKeyUpdate(userData);
+      }
     }
   };
 

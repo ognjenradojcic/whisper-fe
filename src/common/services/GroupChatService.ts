@@ -11,6 +11,9 @@ export const GroupChatService = {
   },
 
   async create(data: { group_id: string; payload: string }) {
-    return await axios.post(`${config.baseUrl}/messages`, data);
+    return await axios.post(`${config.baseUrl}/messages`, {
+      ...data,
+      private_chat: false,
+    });
   },
 };

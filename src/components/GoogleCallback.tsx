@@ -4,6 +4,10 @@ import { useAuth } from "../common/context/AuthProvider";
 import { redirect, useLocation, useNavigate } from "react-router-dom";
 import { useLoading } from "../common/context/LoginProvider";
 import Loading from "./Loading";
+import { EncryptionService } from "../common/services/EncryptionService";
+import storage from "../common/Storage";
+import { UserService } from "../common/services/UserService";
+import { publicKeyUpdate } from "../common/helpers/helpers";
 
 const GoogleCallback = () => {
   const { loading, setLoading } = useLoading();
@@ -18,9 +22,19 @@ const GoogleCallback = () => {
     hasFetched.current = true;
 
     AuthService.googleCallback(location.search)
-      .then((response) => {
-        if (response?.data) {
-          login(response?.data);
+      .then(async (response) => {
+        const userData = response?.data.data;
+        if (userData) {
+          login(userData);
+
+          if (
+            !userData.public_key ||
+            !storage.get("private_key") ||
+            userData.public_key !== storage.get("public_key")
+          ) {
+            publicKeyUpdate(userData);
+          }
+
           setLoading(false);
         }
       })

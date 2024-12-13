@@ -11,7 +11,16 @@ export const SingleChatService = {
     return response;
   },
 
-  async create(data: { receiver_id: string; payload: string }) {
-    return await axios.post(`${config.baseUrl}/messages`, data);
+  async create(data: {
+    receiver_id: string;
+    payload: string;
+    sender_aes_key: string;
+    receiver_aes_key: string;
+    iv: string;
+  }) {
+    return await axios.post(`${config.baseUrl}/messages`, {
+      ...data,
+      private_chat: true,
+    });
   },
 };

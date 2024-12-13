@@ -15,9 +15,7 @@ const ProfileSchema = Yup.object().shape({
 
 const Profile = () => {
   const [isReadOnly, setIsReadOnly] = useState<boolean>(true);
-  const { loginData } = useAuth();
-
-  const user = loginData.data;
+  const { authUser } = useAuth();
 
   const getEntities = async () => {
     const response = await UserService.index();
@@ -32,7 +30,10 @@ const Profile = () => {
     actions: FormikHelpers<FormValues>
   ) => {
     try {
-      await UserService.update(values);
+      await UserService.update(authUser.id, {
+        ...values,
+        public_key: authUser.public_key,
+      });
     } catch (error) {
       console.error(error);
     }
@@ -49,7 +50,7 @@ const Profile = () => {
           <div className="card-body">
             <div className="d-flex flex-column">
               <Formik
-                initialValues={{ name: user.name }}
+                initialValues={{ name: authUser.name }}
                 validationSchema={ProfileSchema}
                 onSubmit={ProfileUpdateSubmit}
               >
@@ -58,7 +59,7 @@ const Profile = () => {
                   <Input
                     label=""
                     name="name"
-                    defaultValue={user.name}
+                    defaultValue={authUser.name}
                     readOnly={isReadOnly}
                   />
                 </Form>
