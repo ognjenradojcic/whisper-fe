@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "../common/context/AuthProvider";
-import Chat from "./Chat";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import AppLayout from "./layout/AppLayout";

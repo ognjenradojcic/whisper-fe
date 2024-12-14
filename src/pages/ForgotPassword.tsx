@@ -1,12 +1,10 @@
-import { useEffect, useState } from "react";
-import { Formik, Form, FormikHelpers } from "formik";
+import { useEffect } from "react";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Input from "../components/Input";
 import { useAuth } from "../common/context/AuthProvider";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { AuthService } from "../common/services/AuthService";
-import { useLoading } from "../common/context/LoginProvider";
-import Loading from "../components/Loading";
 
 interface FormValues {
   email: string;
@@ -22,10 +20,7 @@ const ForgotPassword = () => {
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
-  const ForgotPasswordSubmit = async (
-    values: FormValues,
-    actions: FormikHelpers<FormValues>
-  ) => {
+  const ForgotPasswordSubmit = async (values: FormValues) => {
     try {
       await AuthService.forgotPassword(values);
     } catch (error) {
@@ -62,7 +57,7 @@ const ForgotPassword = () => {
                     validationSchema={ForgotPasswordSchema}
                     onSubmit={ForgotPasswordSubmit}
                   >
-                    {(props) => (
+                    {() => (
                       <Form noValidate>
                         <Input
                           label="Email"

@@ -7,7 +7,7 @@ import Pusher from "pusher-js";
 import Echo from "laravel-echo";
 import { BroadcastService } from "./common/services/BroadcastService";
 
-declare var bootstrap: any;
+declare const bootstrap: any;
 
 window.Pusher = Pusher;
 window.Echo = BroadcastService.echo();
@@ -23,7 +23,7 @@ function App() {
   const { isLocalStorageLoaded } = useLoadUserFromLocalStorage();
 
   useEffect(() => {
-    var tooltipTriggerList = [].slice.call(
+    const tooltipTriggerList = [].slice.call(
       document.querySelectorAll('[data-bs-toggle="tooltip"]')
     );
     tooltipTriggerList.map(function (tooltipTriggerEl) {

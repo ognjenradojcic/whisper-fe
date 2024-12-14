@@ -1,12 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { AuthService } from "../common/services/AuthService";
 import { useAuth } from "../common/context/AuthProvider";
-import { redirect, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useLoading } from "../common/context/LoginProvider";
 import Loading from "./Loading";
-import { EncryptionService } from "../common/services/EncryptionService";
 import storage from "../common/Storage";
-import { UserService } from "../common/services/UserService";
 import { publicKeyUpdate } from "../common/helpers/helpers";
 
 const GoogleCallback = () => {

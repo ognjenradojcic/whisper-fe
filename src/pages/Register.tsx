@@ -1,11 +1,9 @@
 import { useEffect } from "react";
-import { Formik, Form, FormikValues, FormikHelpers } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useAuth } from "../common/context/AuthProvider";
 import { NavLink, useNavigate } from "react-router-dom";
-import { AxiosError } from "axios";
 import Input from "../components/Input";
-import Toast from "../common/Toast";
 import { AuthService } from "../common/services/AuthService";
 import config from "../common/config/config";
 
@@ -37,12 +35,9 @@ const Register = () => {
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
-  const RegisterSubmit = async (
-    values: FormValues,
-    actions: FormikHelpers<FormValues>
-  ) => {
+  const RegisterSubmit = async (values: FormValues) => {
     try {
-      const response = await AuthService.register(values);
+      await AuthService.register(values);
 
       navigate("/chats");
     } catch (error) {
@@ -82,7 +77,7 @@ const Register = () => {
                     validationSchema={RegisterSchema}
                     onSubmit={RegisterSubmit}
                   >
-                    {(props) => (
+                    {() => (
                       <Form>
                         <Input
                           label="Name"

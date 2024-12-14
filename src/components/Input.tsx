@@ -10,12 +10,12 @@ const Input: FC<Props & FieldHookConfig<string>> = ({ label, ...props }) => {
 
   const defaultClassName = "form-control form-control-lg";
 
-  let error = meta.touched && meta.error;
+  const error = meta.touched && meta.error;
 
   return (
     <div data-mdb-input-init className="form-outline form-white mb-4">
       <label className="form-label">{label}</label>
-      {/* @ts-ignore */}
+      {/* @ts-expect-error it's ok*/}
       <input
         {...field}
         {...props}

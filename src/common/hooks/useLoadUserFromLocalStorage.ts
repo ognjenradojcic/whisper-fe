@@ -4,11 +4,11 @@ import storage from "../Storage";
 
 const useLoadUserFromLocalStorage = () => {
   const [isLocalStorageLoaded, setIsLocalStorageLoaded] = useState(false);
-  const { isLoggedIn, login } = useAuth();
+  const { login } = useAuth();
 
   useEffect(() => {
     const checkLocalStorageUser = async () => {
-      let user = await storage.get("user");
+      const user = await storage.get("user");
 
       if (!isLocalStorageLoaded && user) {
         login(user.data);

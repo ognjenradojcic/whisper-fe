@@ -1,12 +1,10 @@
-import { useEffect, useState } from "react";
-import { Formik, Form, FormikHelpers } from "formik";
+import { useEffect } from "react";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Input from "../components/Input";
 import { useAuth } from "../common/context/AuthProvider";
-import { Link, NavLink, useNavigate, useSearchParams } from "react-router-dom";
+import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthService } from "../common/services/AuthService";
-import { useLoading } from "../common/context/LoginProvider";
-import Loading from "../components/Loading";
 import config from "../common/config/config";
 
 interface FormValues {
@@ -30,12 +28,9 @@ const ResetPasswordSchema = Yup.object().shape({
 const ResetPassword = () => {
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
-  let [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
-  const ResetPasswordSubmit = async (
-    values: FormValues,
-    actions: FormikHelpers<FormValues>
-  ) => {
+  const ResetPasswordSubmit = async (values: FormValues) => {
     try {
       await AuthService.resetPassword({
         token: searchParams.get("token"),
@@ -78,7 +73,7 @@ const ResetPassword = () => {
                     validationSchema={ResetPasswordSchema}
                     onSubmit={ResetPasswordSubmit}
                   >
-                    {(props) => (
+                    {() => (
                       <Form noValidate>
                         <Input
                           label="Password"

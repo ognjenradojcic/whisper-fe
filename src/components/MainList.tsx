@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { IUser } from "../common/models/User";
-import { UserService } from "../common/services/UserService";
 import { IGroup } from "../common/models/Group";
 import { AxiosResponse } from "axios";
 

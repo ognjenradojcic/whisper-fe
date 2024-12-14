@@ -1,16 +1,11 @@
 import { useEffect, useState } from "react";
-import { Formik, Form, FormikHelpers } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Input from "../components/Input";
 import { useAuth } from "../common/context/AuthProvider";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { AuthService } from "../common/services/AuthService";
-import { useLoading } from "../common/context/LoginProvider";
-import Loading from "../components/Loading";
-import { error } from "console";
-import { EncryptionService } from "../common/services/EncryptionService";
 import storage from "../common/Storage";
-import { UserService } from "../common/services/UserService";
 import { publicKeyUpdate } from "../common/helpers/helpers";
 
 interface FormValues {
@@ -30,10 +25,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [googleRedirect, setGoogleRedirect] = useState<string>("");
 
-  const LoginSubmit = async (
-    values: FormValues,
-    actions: FormikHelpers<FormValues>
-  ) => {
+  const LoginSubmit = async (values: FormValues) => {
     const response = await AuthService.login(values);
 
     const userData = response?.data.data;
@@ -88,7 +80,7 @@ const Login = () => {
                     validationSchema={LoginSchema}
                     onSubmit={LoginSubmit}
                   >
-                    {(props) => (
+                    {() => (
                       <Form noValidate>
                         <Input
                           label="Email"

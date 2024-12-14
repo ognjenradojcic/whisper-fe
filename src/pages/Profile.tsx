@@ -1,4 +1,4 @@
-import { Form, Formik, FormikHelpers } from "formik";
+import { Form, Formik } from "formik";
 import { useEffect, useState } from "react";
 import * as Yup from "yup";
 import { useAuth } from "../common/context/AuthProvider";
@@ -25,10 +25,7 @@ const Profile = () => {
     getEntities();
   }, []);
 
-  const ProfileUpdateSubmit = async (
-    values: FormValues,
-    actions: FormikHelpers<FormValues>
-  ) => {
+  const ProfileUpdateSubmit = async (values: FormValues) => {
     try {
       await UserService.update(authUser.id, {
         ...values,

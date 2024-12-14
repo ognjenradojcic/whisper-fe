@@ -1,4 +1,3 @@
-import Echo from "laravel-echo";
 import { axios } from "../config/axios";
 import config from "../config/config";
 

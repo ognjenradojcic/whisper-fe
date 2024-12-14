@@ -10,9 +10,12 @@ export const BroadcastService = {
       key: config.pusherKey,
       cluster: config.pusherCluster,
       encrypted: true,
-      authorizer: (channel: any, options: any) => {
+      authorizer: (channel: any) => {
         return {
-          authorize: (socketId: string, callback: Function) => {
+          authorize: (
+            socketId: string,
+            callback: (error: boolean, data: any) => void
+          ) => {
             axios
               .post(`${config.baseUrl}/broadcasting/auth`, {
                 socket_id: socketId,
