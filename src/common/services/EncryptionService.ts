@@ -1,6 +1,7 @@
 import { UserOption } from "../../pages/GroupCreate";
 import { base64ToArrayBuffer, base64ToUint8Array } from "../helpers/helpers";
 import { IMessage } from "../models/Message";
+import { IUser } from "../models/User";
 import storage from "../Storage";
 
 export const EncryptionService = {
@@ -167,7 +168,7 @@ export async function decryptAllMessages(
   return decryptedMessages;
 }
 
-export async function encryptMessagePayload(
+export async function encryptSingleChatMessagePayload(
   message: string,
   aesKey: CryptoKey,
   recipientPublicKey: string
@@ -220,20 +221,30 @@ export async function encryptMessagePayload(
 }
 
 export async function encryptGroupAesKey(
-  selectedUsers: UserOption[]
-): Promise<Promise<{ id: string; aes_key: string }>[]> {
+  selectedUsers: UserOption[],
+  authUser: IUser
+): Promise<{ user_id: string; aes_key: string }[]> {
   const aesKey = await EncryptionService.generateAESKey();
 
-  const mappedUsers = selectedUsers.map(async (user) => ({
-    id: user.value,
-    aes_key: btoa(
-      String.fromCharCode(
-        ...new Uint8Array(
-          await EncryptionService.encryptAESKey(aesKey, user.public_key)
-        )
-      )
-    ),
-  }));
+  selectedUsers.push({
+    value: authUser.id.toString(),
+    label: authUser.name,
+    public_key: authUser.public_key,
+  });
 
+  const mappedUsers = await Promise.all(
+    selectedUsers.map(async (user) => ({
+      user_id: user.value,
+      aes_key: user.public_key
+        ? btoa(
+            String.fromCharCode(
+              ...new Uint8Array(
+                await EncryptionService.encryptAESKey(aesKey, user.public_key)
+              )
+            )
+          )
+        : null,
+    }))
+  );
   return mappedUsers;
 }
