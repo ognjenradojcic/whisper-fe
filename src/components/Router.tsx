@@ -13,6 +13,7 @@ import Profile from "../pages/Profile";
 import GoogleCallback from "./GoogleCallback";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
+import GroupCreate from "../pages/GroupCreate";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -46,6 +47,7 @@ const Router = () => {
           <Route path=":receiverId" element={<SingleChat />} />
         </Route>
         <Route path="/groups" element={<GroupLayout />}>
+          <Route path="create" element={<GroupCreate />} />
           <Route path=":groupId" element={<GroupChat />} />
         </Route>
       </Route>

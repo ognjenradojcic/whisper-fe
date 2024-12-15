@@ -28,7 +28,7 @@ const MainList = ({ headerLabel, entityService, route }: MainListProps) => {
   }, []);
 
   return (
-    <div className="d-flex justify-content-start">
+    <div className="d-flex justify-content-start flex-grow-1">
       <div
         className="d-flex flex-column align-items-stretch w-30 border-end border-secondary border-opacity-25"
         style={{ width: "30vw" }}

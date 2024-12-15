@@ -1,3 +1,4 @@
+import { UserOption } from "../../pages/GroupCreate";
 import { base64ToArrayBuffer, base64ToUint8Array } from "../helpers/helpers";
 import { IMessage } from "../models/Message";
 import storage from "../Storage";
@@ -216,4 +217,23 @@ export async function encryptMessagePayload(
     console.error("Error encrypting message:", error);
     throw new Error("Message encryption failed");
   }
+}
+
+export async function encryptGroupAesKey(
+  selectedUsers: UserOption[]
+): Promise<Promise<{ id: string; aes_key: string }>[]> {
+  const aesKey = await EncryptionService.generateAESKey();
+
+  const mappedUsers = selectedUsers.map(async (user) => ({
+    id: user.value,
+    aes_key: btoa(
+      String.fromCharCode(
+        ...new Uint8Array(
+          await EncryptionService.encryptAESKey(aesKey, user.public_key)
+        )
+      )
+    ),
+  }));
+
+  return mappedUsers;
 }

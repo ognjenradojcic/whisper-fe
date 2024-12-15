@@ -16,7 +16,7 @@ interface MessageEvent {
   message: IMessage;
 }
 
-interface ChatProps<T> {
+interface ChatProps {
   entityId: string;
   entityService: {
     oldMessages: (id: string) => Promise<AxiosResponse<any, any>>;
@@ -27,12 +27,12 @@ interface ChatProps<T> {
   entityKeyName: string;
 }
 
-const Chat = <T,>({
+const Chat = ({
   entityId,
   entityService,
   echoChannel,
   entityKeyName,
-}: ChatProps<T>) => {
+}: ChatProps) => {
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [payload, setPayload] = useState<string>("");
   const [entity, setEntity] = useState<IUser | IGroup>();
@@ -117,6 +117,7 @@ const Chat = <T,>({
         )
       );
     } catch (error) {
+      console.error(error);
       setMessages((prevMessages) =>
         prevMessages.map((message) => {
           if (message === sentMessage) {
