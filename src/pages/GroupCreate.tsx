@@ -6,6 +6,7 @@ import { UserService } from "../common/services/UserService";
 import { IUser } from "../common/models/User";
 import Select from "react-select";
 import { GroupService } from "../common/services/GroupService";
+import { useAuth } from "../common/context/AuthProvider";
 
 interface FormValues {
   name: string;
@@ -27,9 +28,10 @@ const GroupCreateSchema = Yup.object().shape({
 
 export default function GroupCreate() {
   const [userOptions, setUserOptions] = useState<UserOption[]>([]);
+  const { authUser } = useAuth();
 
   const groupCreateSubmit = async (values: FormValues) => {
-    GroupService.create(values);
+    GroupService.create(values, authUser);
   };
 
   const getEntities = async () => {

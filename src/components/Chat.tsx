@@ -1,5 +1,5 @@
 import { AxiosResponse } from "axios";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useAuth } from "../common/context/AuthProvider";
 import { IGroup } from "../common/models/Group";
 import { IMessage } from "../common/models/Message";
@@ -8,7 +8,6 @@ import { MessageStatus } from "../common/enums/MessageStatus";
 import {
   decryptAllMessages,
   decryptMessagePayload,
-  EncryptionService,
   encryptMessagePayload,
 } from "../common/services/EncryptionService";
 
@@ -17,6 +16,7 @@ interface MessageEvent {
 }
 
 interface ChatProps {
+  isPrivateChat: boolean;
   entityId: string;
   entityService: {
     oldMessages: (id: string) => Promise<AxiosResponse<any, any>>;
@@ -28,6 +28,7 @@ interface ChatProps {
 }
 
 const Chat = ({
+  isPrivateChat,
   entityId,
   entityService,
   echoChannel,
@@ -36,11 +37,11 @@ const Chat = ({
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [payload, setPayload] = useState<string>("");
   const [entity, setEntity] = useState<IUser | IGroup>();
+  const groupAesKey = useRef<string>("");
   const { authUser } = useAuth();
 
   const authUserId = authUser.id;
 
-  console.log(authUser);
   const receiverPublicKey = entity?.public_key;
 
   const getMessages = async () => {
@@ -51,7 +52,16 @@ const Chat = ({
     if (data) {
       setEntity(data.receiver ?? data.group);
 
-      setMessages(await decryptAllMessages(data.messages, authUserId));
+      groupAesKey.current = data.group_aes_key;
+
+      setMessages(
+        await decryptAllMessages(
+          data.messages,
+          authUserId,
+          isPrivateChat,
+          data.group_aes_key
+        )
+      );
     }
   };
 
@@ -65,7 +75,9 @@ const Chat = ({
 
       receivedMessage.payload = await decryptMessagePayload(
         receivedMessage,
-        authUserId
+        authUserId,
+        isPrivateChat,
+        groupAesKey.current
       );
 
       setMessages((prevMessages) => [...prevMessages, e.message]);
@@ -93,12 +105,11 @@ const Chat = ({
     setMessages((prevMessages) => [...prevMessages, sentMessage]);
 
     try {
-      const aesKey = await EncryptionService.generateAESKey();
-
       const encryptedMessage = await encryptMessagePayload(
         payload,
-        aesKey,
-        receiverPublicKey
+        groupAesKey.current,
+        receiverPublicKey,
+        isPrivateChat
       );
 
       const response = await entityService.create({
@@ -108,7 +119,9 @@ const Chat = ({
 
       response.data.payload = await decryptMessagePayload(
         response?.data,
-        authUserId
+        authUserId,
+        isPrivateChat,
+        groupAesKey.current
       );
 
       setMessages((prevMessages) =>

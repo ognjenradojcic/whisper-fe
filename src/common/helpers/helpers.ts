@@ -29,3 +29,7 @@ export function base64ToUint8Array(base64: string): Uint8Array {
 
   return bytes;
 }
+
+export function base64Encode(buffer: ArrayBuffer | Uint8Array) {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+}

@@ -7,6 +7,7 @@ const SingleChat = () => {
 
   return (
     <Chat
+      isPrivateChat={true}
       entityId={receiverId}
       entityService={SingleChatService}
       echoChannel={(id: string, authUserId: number) =>

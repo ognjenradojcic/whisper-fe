@@ -1,5 +1,10 @@
+import { error } from "console";
 import { UserOption } from "../../pages/GroupCreate";
-import { base64ToArrayBuffer, base64ToUint8Array } from "../helpers/helpers";
+import {
+  base64Encode,
+  base64ToArrayBuffer,
+  base64ToUint8Array,
+} from "../helpers/helpers";
 import { IMessage } from "../models/Message";
 import { IUser } from "../models/User";
 import storage from "../Storage";
@@ -106,23 +111,29 @@ export const EncryptionService = {
 
 export async function decryptMessagePayload(
   message: IMessage,
-  authUserId: number
+  authUserId: number,
+  isPrivateChat: boolean,
+  groupAesKey: string
 ): Promise<string> {
   try {
-    // Step 1: Decrypt AES key using the user's private RSA key
+    let messageAesKey = "";
 
-    const messageAesKey =
-      message.receiver.id === authUserId
-        ? message.receiver_aes_key
-        : message.sender_aes_key;
+    if (isPrivateChat) {
+      messageAesKey =
+        message.receiver.id === authUserId
+          ? message.receiver_aes_key
+          : message.sender_aes_key;
+    } else {
+      messageAesKey = groupAesKey;
+    }
 
     const encryptedAESKey = base64ToArrayBuffer(messageAesKey || "");
+
     const aesKeyBuffer = await EncryptionService.decryptAESKey(
       encryptedAESKey,
       storage.get("private_key")
     );
 
-    // Import the decrypted AES key back as a CryptoKey
     const aesKey = await crypto.subtle.importKey(
       "raw",
       aesKeyBuffer,
@@ -131,18 +142,15 @@ export async function decryptMessagePayload(
       ["decrypt"]
     );
 
-    // Step 2: Convert the payload and IV from Base64
     const encryptedPayload = base64ToArrayBuffer(message.payload);
     const iv = base64ToUint8Array(message.iv || "");
 
-    // Step 3: Decrypt the message payload using AES key and IV
     const decryptedPayloadBuffer = await EncryptionService.decryptMessage(
       encryptedPayload,
       aesKey,
       iv
     );
 
-    // Convert the decrypted ArrayBuffer to a string
     const decryptedPayload = new TextDecoder().decode(decryptedPayloadBuffer);
 
     return decryptedPayload;
@@ -154,13 +162,19 @@ export async function decryptMessagePayload(
 
 export async function decryptAllMessages(
   messages: IMessage[],
-  authUserId: number
+  authUserId: number,
+  isPrivateChat: boolean,
+  groupAesKey: string
 ): Promise<IMessage[]> {
   const decryptedMessages = await Promise.all(
     messages.map(async (message) => {
-      const decryptedPayload = await decryptMessagePayload(message, authUserId);
+      const decryptedPayload = await decryptMessagePayload(
+        message,
+        authUserId,
+        isPrivateChat,
+        groupAesKey
+      );
 
-      // Return a new object with the decrypted payload
       return { ...message, payload: decryptedPayload };
     })
   );
@@ -168,52 +182,54 @@ export async function decryptAllMessages(
   return decryptedMessages;
 }
 
-export async function encryptSingleChatMessagePayload(
+export async function encryptMessagePayload(
   message: string,
-  aesKey: CryptoKey,
-  recipientPublicKey: string
+  groupAesKey: string,
+  recipientPublicKey: string,
+  isPrivateChat: boolean
 ): Promise<{
-  payload: string; // Encrypted message payload (Base64)
-  sender_aes_key: string; // Encrypted AES key (Base64)
-  receiver_aes_key: string; // Encrypted AES key (Base64)
-  iv: string; // Initialization vector (Base64)
+  payload: string;
+  sender_aes_key?: string;
+  receiver_aes_key?: string;
+  iv: string;
 }> {
   try {
-    // Step 1: Encrypt the message with AES-GCM
+    const aesKey = isPrivateChat
+      ? await EncryptionService.generateAESKey()
+      : await decryptAndImportAESKey(groupAesKey);
+
     const { cipherText, iv } = await EncryptionService.encryptMessage(
       message,
       aesKey
     );
 
-    // Step 2: Encrypt the AES key with the recipient's public RSA key
-    const encryptedSenderAESKey = await EncryptionService.encryptAESKey(
-      aesKey,
-      storage.get("public_key")
-    );
-    const encryptedReceiverAESKey = await EncryptionService.encryptAESKey(
-      aesKey,
-      recipientPublicKey
-    );
+    const payloadBase64 = base64Encode(cipherText);
 
-    // Step 3: Convert all results to Base64 for transmission/storage
-    const payloadBase64 = btoa(
-      String.fromCharCode(...new Uint8Array(cipherText))
-    );
-    const senderAesKeyBase64 = btoa(
-      String.fromCharCode(...new Uint8Array(encryptedSenderAESKey))
-    );
-    const receiverAesKeyBase64 = btoa(
-      String.fromCharCode(...new Uint8Array(encryptedReceiverAESKey))
-    );
     const ivBase64 = btoa(String.fromCharCode(...iv));
 
-    // Step 4: Return the encrypted message object
-    return {
+    let result: any = {
       payload: payloadBase64,
-      sender_aes_key: senderAesKeyBase64,
-      receiver_aes_key: receiverAesKeyBase64,
       iv: ivBase64,
     };
+
+    if (isPrivateChat) {
+      const [encryptedSenderAESKey, encryptedReceiverAESKey] =
+        await Promise.all([
+          EncryptionService.encryptAESKey(aesKey, storage.get("public_key")),
+          EncryptionService.encryptAESKey(aesKey, recipientPublicKey),
+        ]);
+
+      const senderAesKeyBase64 = base64Encode(encryptedSenderAESKey);
+      const receiverAesKeyBase64 = base64Encode(encryptedReceiverAESKey);
+
+      result = {
+        ...result,
+        sender_aes_key: senderAesKeyBase64,
+        receiver_aes_key: receiverAesKeyBase64,
+      };
+    }
+
+    return result;
   } catch (error) {
     console.error("Error encrypting message:", error);
     throw new Error("Message encryption failed");
@@ -229,22 +245,45 @@ export async function encryptGroupAesKey(
   selectedUsers.push({
     value: authUser.id.toString(),
     label: authUser.name,
-    public_key: authUser.public_key,
+    public_key: storage.get("public_key"),
   });
 
   const mappedUsers = await Promise.all(
     selectedUsers.map(async (user) => ({
       user_id: user.value,
-      aes_key: user.public_key
-        ? btoa(
-            String.fromCharCode(
-              ...new Uint8Array(
-                await EncryptionService.encryptAESKey(aesKey, user.public_key)
-              )
-            )
-          )
-        : null,
+      aes_key: base64Encode(
+        await EncryptionService.encryptAESKey(aesKey, user.public_key)
+      ),
     }))
   );
+
+  console.log("mapped users", mappedUsers);
+
   return mappedUsers;
+}
+
+async function decryptAndImportAESKey(
+  encryptedAESKeyBase64: string
+): Promise<CryptoKey> {
+  try {
+    const encryptedAESKeyBuffer = base64ToArrayBuffer(encryptedAESKeyBase64);
+
+    const decryptedAESKeyBuffer = await EncryptionService.decryptAESKey(
+      encryptedAESKeyBuffer,
+      storage.get("private_key")
+    );
+
+    const aesKey = await crypto.subtle.importKey(
+      "raw",
+      decryptedAESKeyBuffer,
+      { name: "AES-GCM", length: 256 },
+      true,
+      ["decrypt", "encrypt"]
+    );
+
+    return aesKey;
+  } catch (error) {
+    console.error("Error decrypting and importing AES key:", error);
+    throw new Error("Failed to decrypt and import AES key");
+  }
 }

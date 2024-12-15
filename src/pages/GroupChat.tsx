@@ -7,6 +7,7 @@ const GroupChat = () => {
 
   return (
     <Chat
+      isPrivateChat={false}
       entityId={groupId}
       entityService={GroupChatService}
       echoChannel={(id: string) => `groups.${id}`}

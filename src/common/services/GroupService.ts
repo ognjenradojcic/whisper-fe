@@ -1,6 +1,7 @@
 import { UserOption } from "../../pages/GroupCreate";
 import { axios } from "../config/axios";
 import config from "../config/config";
+import { IUser } from "../models/User";
 import { encryptGroupAesKey } from "./EncryptionService";
 
 export const GroupService = {
@@ -16,11 +17,16 @@ export const GroupService = {
     return response;
   },
 
-  async create(data: { name: string; selectedUsers: UserOption[] }) {
+  async create(
+    data: { name: string; selectedUsers: UserOption[] },
+    authUser: IUser
+  ) {
     const mappedData = {
       name: data.name,
-      user_keys: await encryptGroupAesKey(data.selectedUsers),
+      user_keys: await encryptGroupAesKey(data.selectedUsers, authUser),
     };
+
+    console.log(mappedData);
 
     const response = await axios.post(`${config.baseUrl}/groups`, mappedData);
 
