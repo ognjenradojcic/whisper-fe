@@ -8,6 +8,7 @@ import { updateUserStorageData } from "../common/helpers/helpers";
 
 interface FormValues {
   name: string;
+  status: string;
 }
 
 const ProfileSchema = Yup.object().shape({
@@ -17,6 +18,7 @@ const ProfileSchema = Yup.object().shape({
 const Profile = () => {
   const [isReadOnly, setIsReadOnly] = useState<boolean>(true);
   const [name, setName] = useState<string>("");
+  const [status, setStatus] = useState<string>("");
   const { authUser } = useAuth();
 
   const ProfileUpdateSubmit = async (values: FormValues) => {
@@ -38,6 +40,7 @@ const Profile = () => {
   useEffect(() => {
     if (authUser?.name) {
       setName(authUser.name);
+      setStatus(authUser.status);
     }
   }, [authUser]);
 
@@ -52,7 +55,7 @@ const Profile = () => {
           <div className="card-body">
             <div className="d-flex flex-column">
               <Formik
-                initialValues={{ name: name }}
+                initialValues={{ name: name, status: status }}
                 validationSchema={ProfileSchema}
                 onSubmit={ProfileUpdateSubmit}
                 enableReinitialize
@@ -64,6 +67,19 @@ const Profile = () => {
                       label=""
                       name="name"
                       value={values.name}
+                      onChange={handleChange}
+                      readOnly={isReadOnly}
+                      className={`form-control form-control-lg fs-2 border-0 ${
+                        isReadOnly ? "bg-transparent text-white" : "bg-white"
+                      }`}
+                    />
+                    <h3 className="card-title text-start text-white">
+                      Status:
+                    </h3>
+                    <Input
+                      label=""
+                      name="status"
+                      value={values.status}
                       onChange={handleChange}
                       readOnly={isReadOnly}
                       className={`form-control form-control-lg fs-2 border-0 ${

@@ -11,6 +11,7 @@ export async function publicKeyUpdate(userData: IUser) {
 
   UserService.update(userData.id, {
     name: userData.name,
+    status: userData.status,
     public_key: publicKey,
   });
 }

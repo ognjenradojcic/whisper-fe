@@ -14,7 +14,10 @@ export const UserService = {
     return response;
   },
 
-  async update(id: number, data: { name: string; public_key?: string }) {
+  async update(
+    id: number,
+    data: { name: string; status: string; public_key?: string }
+  ) {
     const response = await axios.patch(`${config.baseUrl}/users/${id}`, data);
 
     return response;
