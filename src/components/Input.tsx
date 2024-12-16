@@ -3,12 +3,15 @@ import { FieldHookConfig, useField } from "formik";
 
 interface Props {
   label: string;
+  className?: string;
 }
 
-const Input: FC<Props & FieldHookConfig<string>> = ({ label, ...props }) => {
+const Input: FC<Props & FieldHookConfig<string>> = ({
+  label,
+  className = "form-control form-control-lg",
+  ...props
+}) => {
   const [field, meta] = useField(props);
-
-  const defaultClassName = "form-control form-control-lg";
 
   const error = meta.touched && meta.error;
 
@@ -19,7 +22,7 @@ const Input: FC<Props & FieldHookConfig<string>> = ({ label, ...props }) => {
       <input
         {...field}
         {...props}
-        className={error ? defaultClassName + " is-invalid" : defaultClassName}
+        className={error ? className + " is-invalid" : className}
       />
       <div
         className={error ? "text-danger" : "invisible"}

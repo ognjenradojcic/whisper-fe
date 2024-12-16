@@ -4,6 +4,7 @@ import * as Yup from "yup";
 import { useAuth } from "../common/context/AuthProvider";
 import { UserService } from "../common/services/UserService";
 import Input from "../components/Input";
+import { updateUserStorageData } from "../common/helpers/helpers";
 
 interface FormValues {
   name: string;
@@ -15,26 +16,30 @@ const ProfileSchema = Yup.object().shape({
 
 const Profile = () => {
   const [isReadOnly, setIsReadOnly] = useState<boolean>(true);
+  const [name, setName] = useState<string>("");
   const { authUser } = useAuth();
-
-  const getEntities = async () => {
-    const response = await UserService.index();
-  };
-
-  useEffect(() => {
-    getEntities();
-  }, []);
 
   const ProfileUpdateSubmit = async (values: FormValues) => {
     try {
-      await UserService.update(authUser.id, {
-        ...values,
-        public_key: authUser.public_key,
-      });
+      const response = await UserService.update(authUser.id, values);
+
+      const fetchedUser = response?.data.data;
+
+      if (fetchedUser) {
+        updateUserStorageData(fetchedUser);
+      }
+
+      setIsReadOnly(true);
     } catch (error) {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    if (authUser?.name) {
+      setName(authUser.name);
+    }
+  }, [authUser]);
 
   return (
     <div className="d-flex justify-content-start">
@@ -47,19 +52,35 @@ const Profile = () => {
           <div className="card-body">
             <div className="d-flex flex-column">
               <Formik
-                initialValues={{ name: authUser.name }}
+                initialValues={{ name: name }}
                 validationSchema={ProfileSchema}
                 onSubmit={ProfileUpdateSubmit}
+                enableReinitialize
               >
-                <Form noValidate>
-                  <h3 className="card-title text-start text-white">Name:</h3>
-                  <Input
-                    label=""
-                    name="name"
-                    defaultValue={authUser.name}
-                    readOnly={isReadOnly}
-                  />
-                </Form>
+                {({ values, handleChange }) => (
+                  <Form noValidate>
+                    <h3 className="card-title text-start text-white">Name:</h3>
+                    <Input
+                      label=""
+                      name="name"
+                      value={values.name}
+                      onChange={handleChange}
+                      readOnly={isReadOnly}
+                      className={`form-control form-control-lg fs-2 border-0 ${
+                        isReadOnly ? "bg-transparent text-white" : "bg-white"
+                      }`}
+                    />
+                    <button
+                      disabled={isReadOnly}
+                      data-mdb-button-init
+                      data-mdb-ripple-init
+                      className="my-button btn btn-lg px-5 text-white"
+                      type="submit"
+                    >
+                      Update
+                    </button>
+                  </Form>
+                )}
               </Formik>
             </div>
             <div className="d-flex justify-content-end">

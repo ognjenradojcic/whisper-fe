@@ -1,4 +1,3 @@
-import { error } from "console";
 import { UserOption } from "../../pages/GroupCreate";
 import {
   base64Encode,

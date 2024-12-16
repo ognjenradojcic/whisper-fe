@@ -33,3 +33,18 @@ export function base64ToUint8Array(base64: string): Uint8Array {
 export function base64Encode(buffer: ArrayBuffer | Uint8Array) {
   return btoa(String.fromCharCode(...new Uint8Array(buffer)));
 }
+
+export function updateUserStorageData(userData: IUser) {
+  const user = storage.get("user");
+
+  if (user) {
+    const updatedUser = {
+      ...user,
+      data: userData,
+    };
+
+    storage.set("user", updatedUser);
+  } else {
+    throw Error("No user found in local storage");
+  }
+}
