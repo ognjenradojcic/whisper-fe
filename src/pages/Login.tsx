@@ -38,7 +38,7 @@ const Login = () => {
         !storage.get("private_key") ||
         userData.public_key !== storage.get("public_key")
       ) {
-        publicKeyUpdate(userData);
+        publicKeyUpdate();
       }
     }
   };

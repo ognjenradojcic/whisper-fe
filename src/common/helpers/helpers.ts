@@ -3,15 +3,17 @@ import { EncryptionService } from "../services/EncryptionService";
 import { UserService } from "../services/UserService";
 import storage from "../Storage";
 
-export async function publicKeyUpdate(userData: IUser) {
+export async function publicKeyUpdate() {
   const { privateKey, publicKey } = await EncryptionService.generateKeyPair();
 
+  setKeyPair(privateKey, publicKey);
+}
+
+export function setKeyPair(privateKey: string, publicKey: string) {
   storage.set("private_key", privateKey);
   storage.set("public_key", publicKey);
 
-  UserService.update(userData.id, {
-    name: userData.name,
-    status: userData.status,
+  UserService.update({
     public_key: publicKey,
   });
 }

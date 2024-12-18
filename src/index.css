@@ -52,6 +52,11 @@ code {
   border: 1px solid #883CEF;
 }
 
+.my-button::file-selector-button {
+  visibility: hidden;
+  width: 25%;
+}
+
 ::-webkit-scrollbar {
   width: 12px;
 }

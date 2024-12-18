@@ -5,6 +5,7 @@ import { useAuth } from "../common/context/AuthProvider";
 import { UserService } from "../common/services/UserService";
 import Input from "../components/Input";
 import { updateUserStorageData } from "../common/helpers/helpers";
+import ImportExportKeys from "../components/ImportExportKeys";
 
 interface FormValues {
   name: string;
@@ -23,7 +24,7 @@ const Profile = () => {
 
   const ProfileUpdateSubmit = async (values: FormValues) => {
     try {
-      const response = await UserService.update(authUser.id, values);
+      const response = await UserService.update(values);
 
       const fetchedUser = response?.data.data;
 
@@ -122,6 +123,9 @@ const Profile = () => {
               </button>
             </div>
           </div>
+        </div>
+        <div className="d-flex flex-column gap-3 mt-auto mb-5 w-50">
+          <ImportExportKeys />
         </div>
       </div>
     </div>

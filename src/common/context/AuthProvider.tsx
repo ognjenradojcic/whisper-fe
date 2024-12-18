@@ -1,11 +1,12 @@
 import { createContext, PropsWithChildren, useContext, useState } from "react";
 import storage from "../Storage";
 import { IUser } from "../models/User";
+import { Role } from "../enums/Role";
 
 interface LoginContextType {
   isLoggedIn: boolean;
   authUser: IUser | null;
-  isAdmin: boolean | undefined;
+  isSuperAdmin: boolean;
   login: (loginData: IUser) => void;
   logout: () => void;
 }
@@ -30,16 +31,17 @@ export const useAuth = () => {
 const AuthProvider = ({ children }: PropsWithChildren) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [authUser, setAuthUser] = useState<IUser | null>(null);
-
-  const isAdmin = true; // Change later, get from response
+  const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(false);
 
   const login = (data: IUser) => {
     setIsLoggedIn(true);
     setAuthUser(data);
+    setIsSuperAdmin(data.role_id === Role.SuperAdmin);
   };
 
   const logout = () => {
     setIsLoggedIn(false);
+    setIsSuperAdmin(false);
     setAuthUser(null);
     storage.remove("user");
     storage.remove("private_key");
@@ -51,7 +53,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       value={{
         isLoggedIn,
         authUser,
-        isAdmin,
+        isSuperAdmin,
         login,
         logout,
       }}

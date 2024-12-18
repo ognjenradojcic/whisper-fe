@@ -95,6 +95,7 @@ const Chat = ({
       id: -1,
       sender: {
         id: authUserId,
+        role_id: authUser.role_id,
         name: authUser.name,
       },
       payload: payload,

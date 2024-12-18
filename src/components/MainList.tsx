@@ -18,10 +18,16 @@ const MainList = ({ headerLabel, entityService, route }: MainListProps) => {
   const getEntities = async () => {
     const response = await entityService.index();
 
-    if (response?.data.data) {
-      setEntities(response?.data.data);
+    const groupsFetched = response?.data.data;
+
+    if (groupsFetched) {
+      setEntities(groupsFetched);
     }
   };
+
+  function isUser(entity: IUser | IGroup): entity is IUser {
+    return (entity as IUser).status !== undefined;
+  }
 
   useEffect(() => {
     getEntities();
@@ -57,16 +63,21 @@ const MainList = ({ headerLabel, entityService, route }: MainListProps) => {
           />
         </div>
         <ul className="list-group list-group-custom overflow-auto">
-          {entities.map(({ id, name }, index) => (
+          {entities.map((entity, index) => (
             <li className="list-group-custom list-group-item" key={index}>
               <Link
-                to={`/${route}/${id}`}
+                to={`/${route}/${entity.id}`}
                 className="py-3 w-100 h-100 d-block text-decoration-none text-white"
                 style={{
                   fontSize: "1.4rem",
                 }}
               >
-                {name}
+                <p className="fs-2">{entity.name}</p>
+                {isUser(entity) ? (
+                  <p>{entity.status} </p>
+                ) : (
+                  <p>{entity.users.map((user) => user.name).join(", ")}</p>
+                )}
               </Link>
             </li>
           ))}

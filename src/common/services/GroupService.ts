@@ -26,8 +26,6 @@ export const GroupService = {
       user_keys: await encryptGroupAesKey(data.selectedUsers, authUser),
     };
 
-    console.log(mappedData);
-
     const response = await axios.post(`${config.baseUrl}/groups`, mappedData);
 
     return response;

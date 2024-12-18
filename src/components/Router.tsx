@@ -19,6 +19,12 @@ interface ProtectedRouteProps {
   children: ReactNode;
 }
 
+function SuperAdminRoute({ children }: ProtectedRouteProps) {
+  const { isSuperAdmin } = useAuth();
+
+  return isSuperAdmin ? children : <Navigate to={"/chats"} />;
+}
+
 function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isLoggedIn } = useAuth();
 
