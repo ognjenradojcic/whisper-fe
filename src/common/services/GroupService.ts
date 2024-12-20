@@ -1,14 +1,15 @@
 import { UserOption } from "../../pages/GroupCreate";
 import { axios } from "../config/axios";
 import config from "../config/config";
+import { IGroup } from "../models/Group";
 import { IUser } from "../models/User";
 import { encryptGroupAesKey } from "./EncryptionService";
 
 export const GroupService = {
-  async index() {
+  async index(): Promise<IGroup[]> {
     const response = await axios.get(`${config.baseUrl}/groups`);
 
-    return response;
+    return response.data.data;
   },
 
   async get(id: string) {

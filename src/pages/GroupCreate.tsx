@@ -37,7 +37,7 @@ export default function GroupCreate() {
   const getEntities = async () => {
     const response = await UserService.index();
 
-    const fetchedUsers = response?.data.data;
+    const fetchedUsers = response;
 
     if (fetchedUsers) {
       setUserOptions(

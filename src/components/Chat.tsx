@@ -10,6 +10,10 @@ import {
   decryptMessagePayload,
   encryptMessagePayload,
 } from "../common/services/EncryptionService";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Loading from "./Loading";
+import { ChatResponse } from "../common/models/ChatResponse";
+import { group } from "console";
 
 interface MessageEvent {
   message: IMessage;
@@ -19,8 +23,8 @@ interface ChatProps {
   isPrivateChat: boolean;
   entityId: string;
   entityService: {
-    oldMessages: (id: string) => Promise<AxiosResponse<any, any>>;
-    create: (data: any) => Promise<AxiosResponse<any, any>>;
+    oldMessages: (id: string) => Promise<ChatResponse>;
+    create: (data: any) => Promise<IMessage>;
   };
   echoChannel: (id: string, authUserId?: number) => string;
   entityLabel: string;
@@ -36,38 +40,90 @@ const Chat = ({
 }: ChatProps) => {
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [payload, setPayload] = useState<string>("");
-  const [entity, setEntity] = useState<IUser | IGroup>();
+  const [receiver, setReceiver] = useState<IUser | IGroup>();
   const groupAesKey = useRef<string>("");
   const { authUser } = useAuth();
 
   const authUserId = authUser.id;
+  const receiverPublicKey = receiver?.public_key;
 
-  const receiverPublicKey = entity?.public_key;
+  const { isPending, isError, data } = useQuery({
+    queryKey: ["messages", entityId],
+    queryFn: async () => {
+      const response = await entityService.oldMessages(entityId);
 
-  const getMessages = async () => {
-    const response = await entityService.oldMessages(entityId);
+      groupAesKey.current = response.group_aes_key;
 
-    const data = response?.data.data;
+      const decrpytedMessages = await decryptAllMessages(
+        response.messages,
+        authUserId,
+        isPrivateChat,
+        response.group_aes_key
+      );
 
-    if (data) {
-      setEntity(data.receiver ?? data.group);
+      return {
+        receiver: response.receiver,
+        messages: decrpytedMessages,
+      };
+    },
+  });
 
-      groupAesKey.current = data.group_aes_key;
+  const { status, error, mutate } = useMutation({
+    mutationFn: async (sentMessage: IMessage) => {
+      const encryptedMessage = await encryptMessagePayload(
+        sentMessage.payload,
+        groupAesKey.current,
+        receiverPublicKey,
+        isPrivateChat
+      );
 
-      setMessages(
-        await decryptAllMessages(
-          data.messages,
-          authUserId,
-          isPrivateChat,
-          data.group_aes_key
+      const response = await entityService.create({
+        [entityKeyName]: entityId,
+        ...encryptedMessage,
+      });
+
+      response.payload = await decryptMessagePayload(
+        response,
+        authUserId,
+        isPrivateChat,
+        groupAesKey.current
+      );
+
+      return response;
+    },
+    onMutate: async (sentMessage: IMessage) => {
+      setMessages((prevMessages) => [...prevMessages, sentMessage]);
+    },
+    onSuccess: (data, sentMessage) => {
+      console.log("Sent: ", sentMessage);
+      console.log("Data: ", data);
+
+      setMessages((prevMessages) =>
+        prevMessages.map((message) =>
+          message === sentMessage ? data : message
         )
       );
-    }
-  };
+    },
+    onError: (error, sentMessage) => {
+      console.error(error);
+      setMessages((prevMessages) =>
+        prevMessages.map((message) => {
+          if (message === sentMessage) {
+            message.status = MessageStatus.Failed;
+          }
+
+          return message;
+        })
+      );
+    },
+  });
 
   useEffect(() => {
-    getMessages();
+    setMessages(data?.messages);
+    setReceiver(data?.receiver);
+  }, [data]);
 
+  useEffect(() => {
     const channel = window.Echo.private(echoChannel(entityId, authUserId));
 
     channel.listen("MessageReceived", async (e: MessageEvent) => {
@@ -88,6 +144,10 @@ const Chat = ({
     };
   }, [entityId]);
 
+  if (isPending || isError) {
+    return <Loading />;
+  }
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
 
@@ -103,45 +163,7 @@ const Chat = ({
       status: MessageStatus.Sending,
     };
 
-    setMessages((prevMessages) => [...prevMessages, sentMessage]);
-
-    try {
-      const encryptedMessage = await encryptMessagePayload(
-        payload,
-        groupAesKey.current,
-        receiverPublicKey,
-        isPrivateChat
-      );
-
-      const response = await entityService.create({
-        [entityKeyName]: entityId,
-        ...encryptedMessage,
-      });
-
-      response.data.payload = await decryptMessagePayload(
-        response?.data,
-        authUserId,
-        isPrivateChat,
-        groupAesKey.current
-      );
-
-      setMessages((prevMessages) =>
-        prevMessages.map((message) =>
-          message === sentMessage ? response.data : message
-        )
-      );
-    } catch (error) {
-      console.error(error);
-      setMessages((prevMessages) =>
-        prevMessages.map((message) => {
-          if (message === sentMessage) {
-            message.status = MessageStatus.Failed;
-          }
-
-          return message;
-        })
-      );
-    }
+    mutate(sentMessage);
 
     setPayload("");
   };
@@ -153,12 +175,12 @@ const Chat = ({
         style={{ backgroundColor: "#04051B" }}
       >
         <h3 className="text-white p-3" style={{ fontSize: "2.3rem" }}>
-          {entity?.name}
+          {receiver?.name}
         </h3>
       </div>
       <div className="d-flex flex-column-reverse overflow-auto w-100 p-5">
         <ul className="list-group list-group-flush border-0">
-          {messages.map((message, index) => (
+          {messages?.map((message, index) => (
             <li
               className={`d-flex list-group-item list-group-item-action py-3 lh-sm bg-transparent border-0 ${
                 message.sender.id === authUserId

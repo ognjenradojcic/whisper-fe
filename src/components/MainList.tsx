@@ -1,37 +1,41 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { IUser } from "../common/models/User";
 import { IGroup } from "../common/models/Group";
-import { AxiosResponse } from "axios";
+import { useQuery } from "@tanstack/react-query";
+import Loading from "./Loading";
+import Toast from "../common/Toast";
 
 interface MainListProps {
   headerLabel: string;
   entityService: {
-    index: () => Promise<AxiosResponse<any, any>>;
+    index: () => Promise<IUser[] | IGroup[]>;
   };
   route: string;
 }
 
 const MainList = ({ headerLabel, entityService, route }: MainListProps) => {
-  const [entities, setEntities] = useState<IUser[] | IGroup[]>([]);
-
-  const getEntities = async () => {
-    const response = await entityService.index();
-
-    const groupsFetched = response?.data.data;
-
-    if (groupsFetched) {
-      setEntities(groupsFetched);
-    }
-  };
+  const {
+    isPending,
+    isError,
+    error,
+    data: entities,
+  } = useQuery({
+    queryKey: ["entities"],
+    queryFn: () => entityService.index(),
+  });
 
   function isUser(entity: IUser | IGroup): entity is IUser {
     return (entity as IUser).status !== undefined;
   }
 
-  useEffect(() => {
-    getEntities();
-  }, []);
+  if (isPending) {
+    return <Loading />;
+  }
+
+  if (isError) {
+    Toast.error(error);
+    return <Loading />;
+  }
 
   return (
     <div className="d-flex justify-content-start flex-grow-1">
@@ -41,20 +45,6 @@ const MainList = ({ headerLabel, entityService, route }: MainListProps) => {
       >
         <h1 className="text-white py-5 ps-3">{headerLabel}</h1>
         <div className="search-div ps-3">
-          <div className="d-flex gap-2">
-            <button
-              className="my-button btn btn-lg px-5 mb-4 text-white"
-              type="submit"
-            >
-              All
-            </button>
-            <button
-              className="my-button btn btn-lg px-5 mb-4 ms-3 text-white"
-              type="submit"
-            >
-              Unread
-            </button>
-          </div>
           <input
             type="search"
             className="search form-control form-control-lg text-bg-dark border border-0 w-75"
@@ -63,7 +53,7 @@ const MainList = ({ headerLabel, entityService, route }: MainListProps) => {
           />
         </div>
         <ul className="list-group list-group-custom overflow-auto">
-          {entities.map((entity, index) => (
+          {entities?.map((entity, index) => (
             <li className="list-group-custom list-group-item" key={index}>
               <Link
                 to={`/${route}/${entity.id}`}

@@ -100,11 +100,13 @@ export const EncryptionService = {
     aesKey: CryptoKey,
     iv: Uint8Array
   ) {
-    return await crypto.subtle.decrypt(
+    const response = await crypto.subtle.decrypt(
       { name: "AES-GCM", iv: iv },
       aesKey,
       encryptedMessage
     );
+
+    return response;
   },
 };
 
