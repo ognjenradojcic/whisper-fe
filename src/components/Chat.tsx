@@ -45,7 +45,7 @@ const Chat = ({
   const authUserId = authUser.id;
   const receiverPublicKey = receiver?.public_key;
 
-  const { isPending, isError, data, error } = useQuery({
+  const { isPending, isError, data } = useQuery({
     queryKey: ["messages", entityId, isPrivateChat ? "private" : "group"],
     queryFn: async () => {
       const response = await entityService.oldMessages(entityId);
