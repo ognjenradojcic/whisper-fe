@@ -1,4 +1,3 @@
-import { AxiosResponse } from "axios";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useAuth } from "../common/context/AuthProvider";
 import { IGroup } from "../common/models/Group";
@@ -10,10 +9,9 @@ import {
   decryptMessagePayload,
   encryptMessagePayload,
 } from "../common/services/EncryptionService";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Loading from "./Loading";
 import { ChatResponse } from "../common/models/ChatResponse";
-import { group } from "console";
 
 interface MessageEvent {
   message: IMessage;
@@ -47,8 +45,8 @@ const Chat = ({
   const authUserId = authUser.id;
   const receiverPublicKey = receiver?.public_key;
 
-  const { isPending, isError, data } = useQuery({
-    queryKey: ["messages", entityId],
+  const { isPending, isError, data, error } = useQuery({
+    queryKey: ["messages", entityId, isPrivateChat ? "private" : "group"],
     queryFn: async () => {
       const response = await entityService.oldMessages(entityId);
 
@@ -68,7 +66,7 @@ const Chat = ({
     },
   });
 
-  const { status, error, mutate } = useMutation({
+  const { mutate } = useMutation({
     mutationFn: async (sentMessage: IMessage) => {
       const encryptedMessage = await encryptMessagePayload(
         sentMessage.payload,

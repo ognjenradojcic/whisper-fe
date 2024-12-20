@@ -9,13 +9,15 @@ export const GroupChatService = {
       `${config.baseUrl}/messages/${groupId}/group`
     );
 
-    return response.data.data.messages;
+    return response.data.data;
   },
 
   async create(data: { group_id: string; payload: string }): Promise<IMessage> {
-    return await axios.post(`${config.baseUrl}/messages`, {
+    const response = await axios.post(`${config.baseUrl}/messages`, {
       ...data,
       private_chat: false,
     });
+
+    return response.data;
   },
 };

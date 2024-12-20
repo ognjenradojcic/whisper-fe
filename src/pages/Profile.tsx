@@ -6,6 +6,7 @@ import { UserService } from "../common/services/UserService";
 import Input from "../components/Input";
 import { updateUserStorageData } from "../common/helpers/helpers";
 import ImportExportKeys from "../components/ImportExportKeys";
+import { useMutation } from "@tanstack/react-query";
 
 interface FormValues {
   name: string;
@@ -22,20 +23,18 @@ const Profile = () => {
   const [status, setStatus] = useState<string>("");
   const { authUser } = useAuth();
 
-  const ProfileUpdateSubmit = async (values: FormValues) => {
-    try {
-      const response = await UserService.update(values);
-
-      const fetchedUser = response?.data.data;
-
+  const { mutate } = useMutation({
+    mutationFn: async (values: FormValues) => await UserService.update(values),
+    onSuccess: (fetchedUser) => {
       if (fetchedUser) {
         updateUserStorageData(fetchedUser);
+        setIsReadOnly(true);
       }
+    },
+  });
 
-      setIsReadOnly(true);
-    } catch (error) {
-      console.error(error);
-    }
+  const ProfileUpdateSubmit = (values: FormValues) => {
+    mutate(values);
   };
 
   useEffect(() => {

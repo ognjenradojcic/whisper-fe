@@ -1,4 +1,4 @@
-import { ErrorMessage, Form, Formik } from "formik";
+import { ErrorMessage, Form, Formik, FormikHelpers } from "formik";
 import Input from "../components/Input";
 import { useEffect, useState } from "react";
 import * as Yup from "yup";
@@ -7,6 +7,8 @@ import { IUser } from "../common/models/User";
 import Select from "react-select";
 import { GroupService } from "../common/services/GroupService";
 import { useAuth } from "../common/context/AuthProvider";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Loading from "../components/Loading";
 
 interface FormValues {
   name: string;
@@ -29,30 +31,49 @@ const GroupCreateSchema = Yup.object().shape({
 export default function GroupCreate() {
   const [userOptions, setUserOptions] = useState<UserOption[]>([]);
   const { authUser } = useAuth();
+  const queryClient = useQueryClient();
 
-  const groupCreateSubmit = async (values: FormValues) => {
-    GroupService.create(values, authUser);
-  };
+  const {
+    isPending,
+    isError,
+    data: users,
+  } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => UserService.index(),
+  });
 
-  const getEntities = async () => {
-    const response = await UserService.index();
+  const { mutate } = useMutation({
+    mutationFn: async (values: FormValues) =>
+      GroupService.create(values, authUser),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["entities"] });
+    },
+  });
 
-    const fetchedUsers = response;
-
-    if (fetchedUsers) {
+  useEffect(() => {
+    if (users) {
       setUserOptions(
-        fetchedUsers.map((user: IUser) => ({
+        users.map((user: IUser) => ({
           value: `${user.id}`,
           label: user.name,
           public_key: user.public_key,
         }))
       );
     }
-  };
+  }, [users]);
 
-  useEffect(() => {
-    getEntities();
-  }, []);
+  if (isPending || isError) {
+    return <Loading />;
+  }
+
+  const groupCreateSubmit = async (
+    values: FormValues,
+    { resetForm }: FormikHelpers<FormValues>
+  ) => {
+    mutate(values);
+
+    resetForm();
+  };
 
   return (
     <div className="d-flex flex-row justify-content-center align-items-center h-100 w-100">

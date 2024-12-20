@@ -3,7 +3,6 @@ import { IUser } from "../common/models/User";
 import { IGroup } from "../common/models/Group";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "./Loading";
-import Toast from "../common/Toast";
 
 interface MainListProps {
   headerLabel: string;
@@ -17,7 +16,6 @@ const MainList = ({ headerLabel, entityService, route }: MainListProps) => {
   const {
     isPending,
     isError,
-    error,
     data: entities,
   } = useQuery({
     queryKey: ["entities"],
@@ -28,12 +26,7 @@ const MainList = ({ headerLabel, entityService, route }: MainListProps) => {
     return (entity as IUser).status !== undefined;
   }
 
-  if (isPending) {
-    return <Loading />;
-  }
-
-  if (isError) {
-    Toast.error(error);
+  if (isPending || isError) {
     return <Loading />;
   }
 
