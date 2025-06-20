@@ -37,14 +37,6 @@ const MainList = ({ headerLabel, entityService, route }: MainListProps) => {
         style={{ width: "30vw" }}
       >
         <h1 className="text-white py-5 ps-3">{headerLabel}</h1>
-        <div className="search-div ps-3">
-          <input
-            type="search"
-            className="search form-control form-control-lg text-bg-dark border border-0 w-75"
-            placeholder="Search..."
-            aria-label="Search"
-          />
-        </div>
         <ul className="list-group list-group-custom overflow-auto">
           {entities?.map((entity, index) => (
             <li className="list-group-custom list-group-item" key={index}>
